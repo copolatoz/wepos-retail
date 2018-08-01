@@ -115,7 +115,7 @@ CREATE TABLE `apps_clients` (
 
 /*Data for the table `apps_clients` */
 
-insert  into `apps_clients`(`id`,`client_code`,`client_name`,`client_address`,`city_id`,`province_id`,`client_postcode`,`country_id`,`client_phone`,`client_fax`,`client_email`,`client_logo`,`client_website`,`client_notes`,`createdby`,`created`,`updatedby`,`updated`,`is_active`,`is_deleted`,`client_ip`,`mysql_user`,`mysql_pass`,`mysql_port`,`mysql_database`,`merchant_verified`,`merchant_xid`) values (1,'APP1477128714-5452','WePOS Retail Free','Jl.kebon sirih dalam no.26',0,0,NULL,NULL,'081222549676','','contact@aplikasi-pos.com','logo.png',NULL,NULL,'administrator','2016-06-18 04:07:01','system','2018-08-01 09:13:24',1,0,NULL,NULL,NULL,NULL,NULL,'verified','dc0271053c027f3ac28884a17ac1f939');
+insert  into `apps_clients`(`id`,`client_code`,`client_name`,`client_address`,`city_id`,`province_id`,`client_postcode`,`country_id`,`client_phone`,`client_fax`,`client_email`,`client_logo`,`client_website`,`client_notes`,`createdby`,`created`,`updatedby`,`updated`,`is_active`,`is_deleted`,`client_ip`,`mysql_user`,`mysql_pass`,`mysql_port`,`mysql_database`,`merchant_verified`,`merchant_xid`) values (1,'','WePOS Retail Free','Jl.kebon sirih dalam no.26',0,0,NULL,NULL,'081222549676','','contact@aplikasi-pos.com','logo.png',NULL,NULL,'administrator','2016-06-18 04:07:01','system','2018-08-01 09:13:24',1,0,NULL,NULL,NULL,NULL,NULL,'unverified','');
 
 /*Table structure for table `apps_clients_structure` */
 
