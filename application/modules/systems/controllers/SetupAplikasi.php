@@ -40,7 +40,7 @@ class SetupAplikasi extends MY_Controller {
 			'use_approval_po','approval_change_payment_po_done','purchasing_request_order','auto_add_supplier_item_when_purchasing','auto_add_supplier_ap','receiving_select_warehouse',
 			'stock_rekap_start_date','persediaan_barang',
 			'auto_item_code','item_code_separator','item_code_format','item_no_length','so_count_stock','ds_count_stock','ds_auto_terima','hide_empty_stock_on_report',
-			'use_item_sku','item_sku_from_code','autocut_stok_sales','salesorder_cek_stok',
+			'use_item_sku','item_sku_from_code','autocut_stok_sales_to_usage','salesorder_cek_stok',
 			
 			'closing_sales_start_date','autoclosing_generate_sales','autoclosing_closing_sales','autoclosing_auto_cancel_billing','closing_purchasing_start_date',
 			'autoclosing_generate_purchasing','autoclosing_closing_purchasing','autoclosing_auto_cancel_receiving',
@@ -112,7 +112,7 @@ class SetupAplikasi extends MY_Controller {
 			'use_approval_po','approval_change_payment_po_done','purchasing_request_order','auto_add_supplier_item_when_purchasing','auto_add_supplier_ap','receiving_select_warehouse',
 			'stock_rekap_start_date','persediaan_barang',
 			'auto_item_code','item_code_separator','item_code_format','item_no_length','so_count_stock','ds_count_stock','ds_auto_terima','hide_empty_stock_on_report',
-			'use_item_sku','item_sku_from_code','autocut_stok_sales','salesorder_cek_stok',
+			'use_item_sku','item_sku_from_code','autocut_stok_sales_to_usage','salesorder_cek_stok',
 			
 			'autoclosing_generate_timer','autoclosing_closing_time',
 			'closing_sales_start_date','autoclosing_generate_sales','autoclosing_closing_sales','autoclosing_auto_cancel_billing','closing_purchasing_start_date',
@@ -172,8 +172,8 @@ class SetupAplikasi extends MY_Controller {
 			'cashier_credit_ar'				=> 0,
 			'min_noncash'					=> 0,
 			'no_hold_billing'				=> 0,
-			'default_tipe_billing'				=> 0,
 			'print_preview_billing'			=> 0,
+			'default_tipe_billing'			=> 0,
 					
 			'print_order_peritem_kitchen'	=> 0,
 			'print_order_peritem_bar'		=> 0,
@@ -208,7 +208,7 @@ class SetupAplikasi extends MY_Controller {
 			'hide_empty_stock_on_report'	=> 0,
 			'use_item_sku'					=> 0,
 			'item_sku_from_code'			=> 0,
-			'autocut_stok_sales'	=> 0,
+			'autocut_stok_sales_to_usage'	=> 0,
 			
 			'autoclosing_generate_timer'			=> 600000,
 			'autoclosing_closing_time'				=>'03:00',
