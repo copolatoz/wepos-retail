@@ -11,7 +11,7 @@ WePOS merupakan Karya anak bangsa, support Team WePOS dengan Donasi dari rekan-r
 
 #Cara Instalasi:
 1. Install XAMPP 5.5.24 atau 5.6.32
-2. copy-paste folder hasil download aplikasi 'wepos-free' ke xampp/htdocs/
+2. copy-paste folder hasil download aplikasi 'wepos-retail' ke xampp/htdocs/
 
 	#copy dan rename file:
 	1. copy index.php.org --> index.php
@@ -24,15 +24,15 @@ WePOS merupakan Karya anak bangsa, support Team WePOS dengan Donasi dari rekan-r
 
 	#import database: db/database_wepos_free.sql
 	1. akses ke http://localhost/phpmyadmin
-	2. buat database baru misal: wepos-free
+	2. buat database baru misal: wepos-retail
 	3. import db/database_wepos_free.sql
 
 
-3. run di browser sesuai nama folder yang digunakan, default: http://localhost/wepos-free
+3. run di browser sesuai nama folder yang digunakan, default: http://localhost/wepos-retail
 
 	#Mengganti URL menjadi http://localhost/nama-retail-anda
-	1. ganti nama folder download 'wepos-free' menjadi 'nama-retail-anda'
-	2. ubah text pada file .htaccess 'wepos-free' menjadi 'nama-retail-anda'
+	1. ganti nama folder download 'wepos-retail' menjadi 'nama-retail-anda'
+	2. ubah text pada file .htaccess 'wepos-retail' menjadi 'nama-retail-anda'
 		*jika .htaccess tidak ditemukan, ubah settingan folder anda agar dapat melihat hidden file dan ekstensi file
 		*gunakan editor semisal notepad++ untuk save-as atau membuat/edit file .htaccess
 
