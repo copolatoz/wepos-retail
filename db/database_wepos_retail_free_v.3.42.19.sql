@@ -50,7 +50,7 @@ CREATE TABLE `acc_account_payable` (
   `no_kontrabon` varchar(30) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ap_no` (`ap_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `acc_account_payable` */
 
@@ -71,7 +71,7 @@ CREATE TABLE `acc_autoposting` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `acc_autoposting` */
 
@@ -84,21 +84,21 @@ DROP TABLE IF EXISTS `apps_clients`;
 CREATE TABLE `apps_clients` (
   `id` tinyint(4) NOT NULL AUTO_INCREMENT,
   `client_code` varchar(50) NOT NULL,
-  `client_name` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `client_address` char(150) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `client_name` char(100) NOT NULL,
+  `client_address` char(150) DEFAULT NULL,
   `city_id` tinyint(4) DEFAULT NULL,
   `province_id` tinyint(4) DEFAULT NULL,
-  `client_postcode` char(5) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `client_postcode` char(5) DEFAULT NULL,
   `country_id` tinyint(4) DEFAULT NULL,
-  `client_phone` char(20) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `client_fax` char(20) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `client_email` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `client_logo` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `client_website` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `client_notes` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `createdby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `client_phone` char(20) DEFAULT NULL,
+  `client_fax` char(20) DEFAULT NULL,
+  `client_email` char(50) DEFAULT NULL,
+  `client_logo` char(50) DEFAULT NULL,
+  `client_website` char(50) DEFAULT NULL,
+  `client_notes` char(100) DEFAULT NULL,
+  `createdby` char(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
-  `updatedby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `updatedby` char(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -111,7 +111,7 @@ CREATE TABLE `apps_clients` (
   `merchant_xid` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `rs_kode` (`client_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_clients` */
 
@@ -123,22 +123,22 @@ DROP TABLE IF EXISTS `apps_clients_structure`;
 
 CREATE TABLE `apps_clients_structure` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
-  `client_structure_name` char(100) CHARACTER SET latin1 NOT NULL,
-  `client_structure_notes` char(100) CHARACTER SET latin1 DEFAULT NULL,
+  `client_structure_name` char(100) NOT NULL,
+  `client_structure_notes` char(100) DEFAULT NULL,
   `client_structure_parent` smallint(6) DEFAULT '0',
   `client_structure_order` smallint(6) DEFAULT '0',
   `is_child` tinyint(1) DEFAULT '1',
   `role_id` smallint(6) DEFAULT NULL,
   `client_id` tinyint(4) DEFAULT NULL,
   `client_unit_id` tinyint(4) DEFAULT NULL,
-  `createdby` char(50) CHARACTER SET latin1 DEFAULT NULL,
+  `createdby` char(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
-  `updatedby` char(50) CHARACTER SET latin1 DEFAULT NULL,
+  `updatedby` char(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_clients_structure` */
 
@@ -150,17 +150,17 @@ DROP TABLE IF EXISTS `apps_clients_unit`;
 
 CREATE TABLE `apps_clients_unit` (
   `id` tinyint(4) NOT NULL AUTO_INCREMENT,
-  `client_unit_name` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `client_unit_name` char(50) NOT NULL,
   `client_id` tinyint(4) NOT NULL,
-  `client_unit_code` char(10) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `createdby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `client_unit_code` char(10) DEFAULT NULL,
+  `createdby` char(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
-  `updatedby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `updatedby` char(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_clients_unit` */
 
@@ -172,45 +172,45 @@ DROP TABLE IF EXISTS `apps_modules`;
 
 CREATE TABLE `apps_modules` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `module_name` varchar(255) CHARACTER SET latin1 NOT NULL,
-  `module_author` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `module_version` varchar(10) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `module_description` varchar(255) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `module_folder` varchar(255) CHARACTER SET latin1 NOT NULL,
-  `module_controller` varchar(255) CHARACTER SET latin1 NOT NULL,
+  `module_name` varchar(255) NOT NULL,
+  `module_author` varchar(100) DEFAULT NULL,
+  `module_version` varchar(10) DEFAULT NULL,
+  `module_description` varchar(255) DEFAULT NULL,
+  `module_folder` varchar(255) NOT NULL,
+  `module_controller` varchar(255) NOT NULL,
   `module_is_menu` tinyint(1) DEFAULT '0',
-  `module_breadcrumb` varchar(100) CHARACTER SET latin1 NOT NULL,
+  `module_breadcrumb` varchar(100) NOT NULL,
   `module_order` int(5) DEFAULT '0',
-  `module_icon` varchar(50) CHARACTER SET latin1 DEFAULT NULL,
-  `module_shortcut_icon` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `module_glyph_icon` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `module_glyph_font` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `module_icon` varchar(50) DEFAULT NULL,
+  `module_shortcut_icon` varchar(50) DEFAULT NULL,
+  `module_glyph_icon` varchar(50) DEFAULT NULL,
+  `module_glyph_font` varchar(100) DEFAULT NULL,
   `module_free` tinyint(1) DEFAULT '1',
   `running_background` tinyint(1) DEFAULT '0',
   `show_on_start_menu` tinyint(1) DEFAULT '1',
   `show_on_right_start_menu` tinyint(4) DEFAULT '0',
-  `start_menu_path` varchar(255) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `start_menu_path` varchar(255) DEFAULT NULL,
   `start_menu_order` int(11) DEFAULT '0',
-  `start_menu_icon` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `start_menu_glyph` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `start_menu_icon` varchar(100) DEFAULT NULL,
+  `start_menu_glyph` varchar(100) DEFAULT NULL,
   `show_on_context_menu` tinyint(1) DEFAULT '0',
-  `context_menu_icon` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `context_menu_glyph` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `context_menu_icon` varchar(100) DEFAULT NULL,
+  `context_menu_glyph` varchar(100) DEFAULT NULL,
   `show_on_shorcut_desktop` tinyint(1) DEFAULT NULL,
-  `desktop_shortcut_icon` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `desktop_shortcut_glyph` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `desktop_shortcut_icon` varchar(100) DEFAULT NULL,
+  `desktop_shortcut_glyph` varchar(100) DEFAULT NULL,
   `show_on_preference` tinyint(1) DEFAULT '0',
-  `preference_icon` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `preference_glyph` varchar(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `createdby` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `preference_icon` varchar(100) DEFAULT NULL,
+  `preference_glyph` varchar(100) DEFAULT NULL,
+  `createdby` varchar(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
-  `updatedby` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `updatedby` varchar(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `module_controller` (`module_controller`)
-) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=63 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_modules` */
 
@@ -222,15 +222,15 @@ DROP TABLE IF EXISTS `apps_modules_method`;
 
 CREATE TABLE `apps_modules_method` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
-  `method_function` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+  `method_function` char(100) NOT NULL,
   `module_id` smallint(6) NOT NULL,
-  `method_description` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `createdby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `method_description` char(100) DEFAULT NULL,
+  `createdby` char(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
-  `updatedby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `updatedby` char(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_modules_method` */
 
@@ -240,16 +240,16 @@ DROP TABLE IF EXISTS `apps_modules_preload`;
 
 CREATE TABLE `apps_modules_preload` (
   `id` smallint(6) NOT NULL AUTO_INCREMENT,
-  `preload_filename` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
-  `preload_folderpath` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `preload_filename` char(50) NOT NULL,
+  `preload_folderpath` char(100) DEFAULT NULL,
   `module_id` smallint(6) NOT NULL,
-  `preload_description` char(100) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
-  `createdby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `preload_description` char(100) DEFAULT NULL,
+  `createdby` char(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
-  `updatedby` char(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
+  `updatedby` char(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_modules_preload` */
 
@@ -269,7 +269,7 @@ CREATE TABLE `apps_options` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=169 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_options` */
 
@@ -292,7 +292,7 @@ CREATE TABLE `apps_roles` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_roles` */
 
@@ -317,7 +317,7 @@ CREATE TABLE `apps_roles_module` (
   PRIMARY KEY (`id`),
   KEY `FK_idi_group_rule_list` (`module_id`),
   KEY `FK_idi_group_rule_list2` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=174 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=174 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_roles_module` */
 
@@ -340,7 +340,7 @@ CREATE TABLE `apps_roles_widget` (
   PRIMARY KEY (`id`),
   KEY `FK_idi_group_rule_list` (`widget_id`),
   KEY `FK_idi_group_rule_list2` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_roles_widget` */
 
@@ -358,7 +358,7 @@ CREATE TABLE `apps_supervisor` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_supervisor` */
 
@@ -379,7 +379,7 @@ CREATE TABLE `apps_supervisor_access` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_supervisor_access` */
 
@@ -404,7 +404,7 @@ CREATE TABLE `apps_supervisor_log` (
   `ref_id_1` varchar(50) DEFAULT '',
   `ref_id_2` varchar(50) DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_supervisor_log` */
 
@@ -435,7 +435,7 @@ CREATE TABLE `apps_users` (
   `user_pin` char(8) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `user_username` (`user_username`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_users` */
 
@@ -460,7 +460,7 @@ CREATE TABLE `apps_users_desktop` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_users_desktop` */
 
@@ -481,7 +481,7 @@ CREATE TABLE `apps_users_quickstart` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_users_quickstart` */
 
@@ -500,7 +500,7 @@ CREATE TABLE `apps_users_shortcut` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_users_shortcut` */
 
@@ -524,7 +524,7 @@ CREATE TABLE `apps_widgets` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `module_controller` (`widget_controller`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `apps_widgets` */
 
@@ -545,7 +545,7 @@ CREATE TABLE `pos_bank` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `bank_code_idx` (`bank_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_bank` */
 
@@ -618,7 +618,7 @@ CREATE TABLE `pos_billing` (
   `is_salesorder` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `billing_no` (`billing_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_billing` */
 
@@ -638,7 +638,7 @@ CREATE TABLE `pos_billing_additional_price` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_billing_additional_price` */
 
@@ -719,7 +719,7 @@ CREATE TABLE `pos_billing_detail` (
   `product_type` enum('item','package') DEFAULT 'item',
   `package_item` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_billing_detail` */
 
@@ -801,7 +801,7 @@ CREATE TABLE `pos_billing_detail_split` (
   `product_type` enum('item','package') DEFAULT 'item',
   `package_item` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_billing_detail_split` */
 
@@ -818,7 +818,7 @@ CREATE TABLE `pos_billing_log` (
   `createdby` varchar(50) DEFAULT NULL,
   `created` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_billing_log` */
 
@@ -839,7 +839,7 @@ CREATE TABLE `pos_closing` (
   `updatedby` varchar(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_closing` */
 
@@ -879,7 +879,7 @@ CREATE TABLE `pos_closing_inventory` (
   `updatedby` varchar(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_closing_inventory` */
 
@@ -899,7 +899,7 @@ CREATE TABLE `pos_closing_log` (
   `updatedby` varchar(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_closing_log` */
 
@@ -935,7 +935,7 @@ CREATE TABLE `pos_closing_purchasing` (
   `updated` timestamp NULL DEFAULT NULL,
   `po_total_ro` smallint(6) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_closing_purchasing` */
 
@@ -971,7 +971,7 @@ CREATE TABLE `pos_closing_sales` (
   `updatedby` varchar(50) DEFAULT NULL,
   `updated` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_closing_sales` */
 
@@ -997,7 +997,7 @@ CREATE TABLE `pos_customer` (
   `customer_status` enum('ok','warning','blacklist') DEFAULT 'ok',
   `keterangan_blacklist` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_customer` */
 
@@ -1033,7 +1033,7 @@ CREATE TABLE `pos_discount` (
   `is_sistem_tawar` tinyint(1) DEFAULT '0',
   `is_buy_get` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_discount` */
 
@@ -1059,7 +1059,7 @@ CREATE TABLE `pos_discount_buyget` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`,`get_item`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_discount_buyget` */
 
@@ -1078,7 +1078,7 @@ CREATE TABLE `pos_discount_product` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_discount_product` */
 
@@ -1100,7 +1100,7 @@ CREATE TABLE `pos_discount_voucher` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_discount_voucher` */
 
@@ -1119,7 +1119,7 @@ CREATE TABLE `pos_divisi` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_divisi` */
 
@@ -1141,7 +1141,7 @@ CREATE TABLE `pos_floorplan` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_floorplan` */
 
@@ -1162,7 +1162,7 @@ CREATE TABLE `pos_item_category` (
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `item_category_code` (`item_category_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_item_category` */
 
@@ -1184,7 +1184,7 @@ CREATE TABLE `pos_item_kode_unik` (
   `qty_kode` smallint(6) DEFAULT '1',
   `item_hpp` double DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_item_kode_unik` */
 
@@ -1204,7 +1204,7 @@ CREATE TABLE `pos_item_subcategory1` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_item_subcategory1` */
 
@@ -1226,7 +1226,7 @@ CREATE TABLE `pos_item_subcategory2` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_item_subcategory2` */
 
@@ -1248,7 +1248,7 @@ CREATE TABLE `pos_item_subcategory3` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_item_subcategory3` */
 
@@ -1268,7 +1268,7 @@ CREATE TABLE `pos_item_subcategory4` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_item_subcategory4` */
 
@@ -1315,7 +1315,7 @@ CREATE TABLE `pos_items` (
   `subcategory4_id` smallint(6) DEFAULT '0',
   `item_sku` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_items` */
 
@@ -1337,7 +1337,7 @@ CREATE TABLE `pos_ooo_menu` (
   `is_active` tinyint(1) DEFAULT '0',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_ooo_menu` */
 
@@ -1373,7 +1373,7 @@ CREATE TABLE `pos_open_close_shift` (
   `updated` timestamp NULL DEFAULT NULL,
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_open_close_shift` */
 
@@ -1391,7 +1391,7 @@ CREATE TABLE `pos_order_note` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_order_note` */
 
@@ -1410,7 +1410,7 @@ CREATE TABLE `pos_payment_type` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_payment_type` */
 
@@ -1450,7 +1450,7 @@ CREATE TABLE `pos_po` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `po_number_idx` (`po_number`),
   KEY `fk_po_supplier` (`supplier_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_po` */
 
@@ -1474,7 +1474,7 @@ CREATE TABLE `pos_po_detail` (
   PRIMARY KEY (`id`),
   KEY `fk_po_detail_po` (`po_id`),
   KEY `fk_po_detail_barang` (`item_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_po_detail` */
 
@@ -1497,7 +1497,7 @@ CREATE TABLE `pos_print_monitoring` (
   `tipe_printer` varchar(20) DEFAULT NULL,
   `tipe_pin` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_print_monitoring` */
 
@@ -1521,7 +1521,7 @@ CREATE TABLE `pos_printer` (
   `print_method` enum('ESC/POS','JSPRINT','BROWSER') DEFAULT 'ESC/POS',
   `print_logo` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_printer` */
 
@@ -1562,7 +1562,7 @@ CREATE TABLE `pos_product` (
   `total_bagi_hasil` double DEFAULT '0',
   `supplier_id` int(11) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_product` */
 
@@ -1584,7 +1584,7 @@ CREATE TABLE `pos_product_category` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_product_category` */
 
@@ -1611,7 +1611,7 @@ CREATE TABLE `pos_product_package` (
   `product_varian_id` int(11) DEFAULT '0',
   `varian_id` int(11) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_product_package` */
 
@@ -1637,7 +1637,7 @@ CREATE TABLE `pos_receive_detail` (
   PRIMARY KEY (`id`),
   KEY `fk_receive_receive_detail` (`receive_id`),
   KEY `fk_barang_receive_detail` (`item_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_receive_detail` */
 
@@ -1667,7 +1667,7 @@ CREATE TABLE `pos_receiving` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `receiv_number_idx` (`receive_number`),
   KEY `fk_receiving_supplier` (`supplier_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_receiving` */
 
@@ -1691,7 +1691,7 @@ CREATE TABLE `pos_retur` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `retur_number_idx` (`retur_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_retur` */
 
@@ -1711,7 +1711,7 @@ CREATE TABLE `pos_retur_detail` (
   `retur_ref_det_id` bigint(20) DEFAULT NULL,
   `status_ref` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_retur_detail` */
 
@@ -1741,7 +1741,7 @@ CREATE TABLE `pos_ro` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `ro_number_idx` (`ro_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_ro` */
 
@@ -1765,7 +1765,7 @@ CREATE TABLE `pos_ro_detail` (
   PRIMARY KEY (`id`),
   KEY `fk_ro_detail_ro` (`ro_id`),
   KEY `fk_ro_detail_barang` (`item_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_ro_detail` */
 
@@ -1786,7 +1786,7 @@ CREATE TABLE `pos_room` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_room` */
 
@@ -1813,7 +1813,7 @@ CREATE TABLE `pos_sales` (
   `is_deleted` tinyint(1) DEFAULT '0',
   `sales_type` enum('before_tax','after_tax') DEFAULT 'after_tax',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_sales` */
 
@@ -1854,7 +1854,7 @@ CREATE TABLE `pos_salesorder` (
   `card_no` char(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `pr_number_idx` (`so_number`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_salesorder` */
 
@@ -1877,7 +1877,7 @@ CREATE TABLE `pos_salesorder_detail` (
   `use_stok_kode_unik` tinyint(1) DEFAULT '0',
   `data_stok_kode_unik` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_salesorder_detail` */
 
@@ -1900,7 +1900,7 @@ CREATE TABLE `pos_stock` (
   `storehouse_id` int(11) DEFAULT NULL,
   `is_sto` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock` */
 
@@ -1921,7 +1921,7 @@ CREATE TABLE `pos_stock_koreksi` (
   `keterangan` varchar(255) DEFAULT NULL,
   `trx_type` enum('in','out') DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock_koreksi` */
 
@@ -1943,7 +1943,7 @@ CREATE TABLE `pos_stock_opname` (
   `storehouse_id` int(11) DEFAULT NULL,
   `sto_status` enum('progress','done','cancel') DEFAULT 'progress',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock_opname` */
 
@@ -1967,7 +1967,7 @@ CREATE TABLE `pos_stock_opname_detail` (
   `last_in` double DEFAULT '0',
   `total_last_in` double DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock_opname_detail` */
 
@@ -1991,7 +1991,7 @@ CREATE TABLE `pos_stock_opname_detail_upload` (
   `last_in` double DEFAULT '0',
   `total_last_in` double DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock_opname_detail_upload` */
 
@@ -2011,7 +2011,7 @@ CREATE TABLE `pos_stock_rekap` (
   `total_stock_kemarin` float DEFAULT NULL,
   `item_hpp` double DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock_rekap` */
 
@@ -2027,7 +2027,7 @@ CREATE TABLE `pos_stock_unit` (
   `total_stock_in` int(11) DEFAULT NULL,
   `total_stock_out` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_stock_unit` */
 
@@ -2049,7 +2049,7 @@ CREATE TABLE `pos_storehouse` (
   `is_primary` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `gudang_code_idx` (`storehouse_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_storehouse` */
 
@@ -2070,7 +2070,7 @@ CREATE TABLE `pos_storehouse_item` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_storehouse_item` */
 
@@ -2090,7 +2090,7 @@ CREATE TABLE `pos_storehouse_users` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   `is_retail_warehouse` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_storehouse_users` */
 
@@ -2118,7 +2118,7 @@ CREATE TABLE `pos_supplier` (
   `supplier_status` enum('ok','warning','blacklist') DEFAULT 'ok',
   `keterangan_blacklist` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_supplier` */
 
@@ -2144,7 +2144,7 @@ CREATE TABLE `pos_supplier_item` (
   `last_in` double DEFAULT '0',
   `old_last_in` double DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_supplier_item` */
 
@@ -2168,7 +2168,7 @@ CREATE TABLE `pos_table` (
   `kapasitas` smallint(6) DEFAULT '0',
   `table_tipe` enum('walkin','delivery','online','event') NOT NULL DEFAULT 'walkin',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_table` */
 
@@ -2191,7 +2191,7 @@ CREATE TABLE `pos_table_inventory` (
   `is_active` tinyint(1) DEFAULT '0',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_table_inventory` */
 
@@ -2212,7 +2212,7 @@ CREATE TABLE `pos_unit` (
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_unit` */
 
@@ -2232,7 +2232,7 @@ CREATE TABLE `pos_varian` (
   `is_active` tinyint(1) DEFAULT '1',
   `is_deleted` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
 
 /*Data for the table `pos_varian` */
 
