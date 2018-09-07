@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Login extends MX_Controller {
+class Merchant extends MX_Controller {
 	
 	function __construct(){
 		parent::__construct();
@@ -175,8 +175,9 @@ class Login extends MX_Controller {
 				$config['stricton'] = FALSE;
 				$config['failover'] = array();
 				$this->load->database($config);
-					
+				
 				//$this->db->db_select($store_data[4]);
+				
 				$conn_data = true;
 			}
 			
@@ -244,8 +245,8 @@ class Login extends MX_Controller {
 					$this->load->database($config);
 					
 					//$this->db->db_select($store_data[4]);
-					$conn_data = true;
 					
+					$conn_data = true;
 				}
 				
 			}else{
@@ -258,12 +259,10 @@ class Login extends MX_Controller {
 			if ($conn_data == true){
 				$r['success'] = true;
 				$r['info'] = 'DB Connected';
-				//$r['store_data'] = $store_data;
 			}else{
 				$r['success'] = false;
 				$r['info'] = 'Connect DB Failed. Try Again!';
 				$r['errors'] = array('reason'=>'Connect DB Failed. Try Again.');
-				//$r['store_data'] = $store_data;
 				die(json_encode($r));
 			}
 		}

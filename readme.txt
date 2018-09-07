@@ -39,6 +39,8 @@ WePOS merupakan Karya anak bangsa, support Team WePOS dengan Donasi dari rekan-r
 
 4. untuk setup printer Thermal -> silahkan download extension PHP di website (login wepos.id)
 
+5. Koneksikan dengan wepos.id -> jika mempunyai merchant key berbayar silahkan koneksikan pada module 'Client Info', aplikasi akan otomatis update sesuai varian berbayar
+
 *Untuk Instalasi lengkap bisa baca di dokumentasi (login website, wepos.id)
 
 #Silahkan Donasi untuk versi yang lebih baik ^^ 
