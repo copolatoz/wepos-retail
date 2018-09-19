@@ -3905,10 +3905,10 @@ class BillingCashier extends MY_Controller {
 				$max_number_3 = 14;
 				
 				if($printer_pin_cashierReceipt == 32){
-					$max_text -= 7;
+					$max_text -= 6;
 					$max_number_1 = 7;
-					$max_number_2 = 9;
-					$max_number_3 = 14;
+					$max_number_2 = 8;
+					$max_number_3 = 13;
 				}
 				if($printer_pin_cashierReceipt == 40){
 					$max_text -= 4;
@@ -8392,10 +8392,10 @@ class BillingCashier extends MY_Controller {
 		$max_number_3 = 14;
 
 		if($printer_pin_cashierReceipt == 32){
-			$max_text -= 7;
+			$max_text -= 6;
 			$max_number_1 = 7;
-			$max_number_2 = 9;
-			$max_number_3 = 14;
+			$max_number_2 = 8;
+			$max_number_3 = 13;
 		}
 		if($printer_pin_cashierReceipt == 40){
 			$max_text -= 4;
