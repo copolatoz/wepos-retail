@@ -1,5 +1,5 @@
 
-WePOS - Retail v.3.42.19 (Free Version)
+WePOS - Retail v.3.42.20 (Free Version)
 
 Cocok untuk:
 Retail/Merchant/Toko, Butik, Salon (semua penjualan berbasis Retail)
