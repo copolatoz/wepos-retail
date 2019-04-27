@@ -54,6 +54,29 @@ contact@wepos.id / angga.nugraha@gmail.com
 *JANGAN MALU UNTUK BERTANYA - GRATIS KONSULTASI
 
 
+# Update April 2019 - Retail v.3.42.20
+- Menu Baru: PPOB 
+- Database update
+- Opsi Baru Setup Aplikasi
+- Loader Notify
+- Backup & Sync DB Online
+- update HPP (dinamis)
+- Varian Menu & Varian Item
+- Upload Excel Master Item
+- Product Package -> Gabungan Produk2
+- Product: Item List (CutStock Otomatis / Gramasi / CoGS)
+- Status Print Cashier
+- Cashier Receipt New Format & Settlement
+- AutoCut Stok Option: Langsung & Tidak Langsung (via Usage & Waste)
+- Laporan Baru: Tax, Package, Summary Sales Report (SSR)
+- Update Purchasing & Receiving -> penggunaan SN/IMEI & Stok SN/IMEI
+- Update Inventory Module
+- Filter Pencarian per-Item di Daftar Stok
+- Warning Stok Jika Terlihat Minus (-)
+- Alert jika selisih HPP < Harga Jual
+- AR/Hutang on Settlement & SSR
+- Update module Finance: AR (Hutang) & AP (Piutang)
+
 
 
 
