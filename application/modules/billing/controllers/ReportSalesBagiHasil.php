@@ -74,7 +74,7 @@ class ReportSalesBagiHasil extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(b.payment_date >= '".$qdate_from." 07:00:01' AND b.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(b.payment_date >= '".$qdate_from." 00:00:00' AND b.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, b.id as billing_id, a.updated as billing_date, c.product_name, d.item_code, e.supplier_name");
 			$this->db->from($this->table2." as a");
@@ -167,87 +167,57 @@ class ReportSalesBagiHasil extends MY_Controller {
 				'printer_ip_cashierReceipt_default',
 				'printer_pin_cashierReceipt_default',
 				'printer_tipe_cashierReceipt_default',
-				'printer_id_cashierReceipt_default',
-				'printer_id_cashierReceipt_'.$ip_addr
+				'printer_ip_cashierReceipt_'.$ip_addr,
+				'printer_pin_cashierReceipt_'.$ip_addr,
+				'printer_tipe_cashierReceipt_'.$ip_addr
 			);
 			$get_opt = get_option_value($opt_value);
 			
-			//ID Printer ----------------------
-			$printer_id_cashierReceipt = $get_opt['printer_id_cashierReceipt_default'];
-			if(!empty($get_opt['printer_id_cashierReceipt_'.$ip_addr])){
-				$printer_id_cashierReceipt = $get_opt['printer_id_cashierReceipt_'.$ip_addr];
+			//Cashier Printer ----------------------
+			$printer_ip_cashierReceipt = "\\\\".$ip_addr."\\".$get_opt['printer_ip_cashierReceipt_default'];
+			if(!empty($get_opt['printer_ip_cashierReceipt_'.$ip_addr])){
+				$printer_ip_cashierReceipt = $get_opt['printer_ip_cashierReceipt_'.$ip_addr];			
+				if(strstr($printer_ip_cashierReceipt, '\\')){
+					$printer_ip_cashierReceipt = "\\\\".$printer_ip_cashierReceipt;
+				}			
+			}		
+			
+			if(empty($get_opt['cashierReceipt_bagihasil_layout'])){
+				$get_opt['cashierReceipt_bagihasil_layout'] = '';
 			}
-			
-			//GET PRINTER DATA
-			$this->db->from($this->prefix.'printer');		
-			$this->db->where("id", $printer_id_cashierReceipt);		
-			$get_printer = $this->db->get();
-
-			$data_printer = array();
-			if($get_printer->num_rows() > 0){
-				$data_printer = $get_printer->row_array();
-			}else{
-				echo 'Printer Tidak Ditemukan!';
-				die();
-			}	
-			
-			//update -- 2018-01-23
-			$printer_ip_cashierReceipt = $data_printer['printer_ip'];			
-			if(strstr($printer_ip_cashierReceipt, '\\')){
-				$printer_ip_cashierReceipt = "\\\\".$printer_ip_cashierReceipt;
-			}	
-
-			$printer_pin_cashierReceipt = $data_printer['printer_pin'];
-			$printer_type_cashier = $data_printer['printer_tipe'];
-			
-
 			$cashierReceipt_bagihasil_layout = $get_opt['cashierReceipt_bagihasil_layout'];
-			if(!empty($print_type)){
-				$cashierReceipt_bagihasil_layout = $get_opt['cashierReceipt_bagihasil_layout'];
-			}
-
-			$printer_pin_cashierReceipt = trim(str_replace("CHAR", "", $printer_pin_cashierReceipt));
-
-			$no_limit_text = false;
-			if($data_printer['print_method'] == 'ESC/POS'){
-				//$no_limit_text = false;
+			//---------------------- Cashier Printer
+			
+			$printer_pin_cashierReceipt = 'PIN 42';
+			if(!empty($get_opt['printer_pin_cashierReceipt_'.$ip_addr])){
+				$printer_pin_cashierReceipt = $get_opt['printer_pin_cashierReceipt_'.$ip_addr];
 			}
 			
 			//trim prod name
-			$max_text = 18; //44
-			$max_number_1 = 9;
-			$max_number_2 = 13;
-			$max_number_3 = 14;
-
-			if($printer_pin_cashierReceipt == 32){
+			$max_text = 19;
+			
+			if($printer_pin_cashierReceipt == 'PIN 32'){
 				$max_text -= 7;
-				$max_number_1 = 7;
-				$max_number_2 = 9;
-				$max_number_3 = 14;
 			}
-			if($printer_pin_cashierReceipt == 40){
-				$max_text -= 4;
-				$max_number_1 = 7;
-				$max_number_2 = 11;
-				$max_number_3 = 14;
+			if($printer_pin_cashierReceipt == 'PIN 40'){
+				$max_text -= 2;
 			}
-			if($printer_pin_cashierReceipt == 42){
-				$max_text -= 3;
-				$max_number_1 = 9;
-				$max_number_2 = 13;
-				$max_number_3 = 14;
+			if($printer_pin_cashierReceipt == 'PIN 48'){
+				$max_text += 6;
 			}
-			if($printer_pin_cashierReceipt == 46){
-				$max_text += 2;
-				$max_number_1 = 9;
-				$max_number_2 = 13;
-				$max_number_3 = 14;
+			
+			//TYPE PRINTER
+			$printer_type_cashier = '';
+			$printer_tipe_cashierReceipt_default = '';
+			if(!empty($get_opt['printer_tipe_cashierReceipt_default'])){
+				$printer_tipe_cashierReceipt_default = $get_opt['printer_tipe_cashierReceipt_default'];
 			}
-			if($printer_pin_cashierReceipt == 48){
-				$max_text += 4;
-				$max_number_1 = 9;
-				$max_number_2 = 13;
-				$max_number_3 = 14;
+			if(!empty($get_opt['printer_tipe_cashierReceipt_'.$ip_addr])){
+				$printer_type_cashier = $get_opt['printer_tipe_cashierReceipt_'.$ip_addr];
+			}
+			
+			if(empty($printer_type_cashier)){
+				$printer_type_cashier = $printer_tipe_cashierReceipt_default;
 			}
 			
 			$sales_data_title = "";
@@ -256,14 +226,11 @@ class ReportSalesBagiHasil extends MY_Controller {
 			$total_sales = 0;
 			$total_toko = 0;
 			$total_supplier = 0;
-			$all_text_array = array();
-			$no = 0;
 			
 			if(!empty($data_post['report_data'])){
 				
 				foreach($data_post['report_data'] as $dt){
 					
-					$no++;
 					$product_name = $dt['product_name'];
 					
 					if(strlen($product_name) > $max_text){
@@ -314,22 +281,22 @@ class ReportSalesBagiHasil extends MY_Controller {
 						}
 					}
 							
-					$total_price = printer_command_align_right($dt['total_price'], $max_number_1);		
-					$total_price_supplier = printer_command_align_right($dt['total_price_supplier'], $max_number_2);
+					$total_price = printer_command_align_right($dt['total_price'], 7);		
+					$total_price_supplier = printer_command_align_right($dt['total_price_supplier'], 9);
 					
-					if(in_array($printer_pin_cashierReceipt, array(32,40)) AND $no_limit_text == false){
-						$total_price = printer_command_align_right($dt['total_price'], $max_number_1);
-						$total_price_supplier = printer_command_align_right($dt['total_price_supplier'], $max_number_2);
+					if($printer_pin_cashierReceipt == 'PIN 32'){
+						$total_price = printer_command_align_right($dt['total_price'], 6);
+						$total_price_supplier = printer_command_align_right($dt['total_price_supplier'], 8);
 					
 						if(empty($sales_data_title)){
-							$sales_data_title = "[align=0]QTY[tab]ITEM[tab]".printer_command_align_right("SALES",$max_number_1)."[tab]".printer_command_align_right("SUPPLIER",$max_number_2);
+							$sales_data_title = "[align=0]QTY[tab]ITEM[tab]".printer_command_align_right("SALES",6)."[tab]".printer_command_align_right("SUPPLIER",8);
 							
 						}
 						
 					}else{
 						
 						if(empty($sales_data_title)){
-							$sales_data_title = "[align=0]QTY[tab]ITEM[tab]".printer_command_align_right("SALES",$max_number_1)."[tab]".printer_command_align_right("SUPPLIER",$max_number_2);
+							$sales_data_title = "[align=0]QTY[tab]ITEM[tab]".printer_command_align_right("SALES",7)."[tab]".printer_command_align_right("SUPPLIER",9);
 							
 						}
 					}
@@ -359,10 +326,10 @@ class ReportSalesBagiHasil extends MY_Controller {
 			}
 			
 			
-			$total_qty = printer_command_align_right(priceFormat($total_qty), $max_number_3);
-			$total_sales = printer_command_align_right(priceFormat($total_sales), $max_number_3);
-			$total_toko = printer_command_align_right(priceFormat($total_toko), $max_number_3);
-			$total_supplier = printer_command_align_right(priceFormat($total_supplier), $max_number_3);
+			$total_qty = printer_command_align_right(priceFormat($total_qty), 11);
+			$total_sales = printer_command_align_right(priceFormat($total_sales), 11);
+			$total_toko = printer_command_align_right(priceFormat($total_toko), 11);
+			$total_supplier = printer_command_align_right(priceFormat($total_supplier), 11);
 			
 			$print_attr = array(
 				"{tanggal_shift}"		=> date("d/m/Y"),
@@ -379,59 +346,47 @@ class ReportSalesBagiHasil extends MY_Controller {
 			$print_content_cashierReceipt = strtr($cashierReceipt_bagihasil_layout, $print_attr);
 			
 			
-			$print_content = replace_to_printer_command($print_content_cashierReceipt, $printer_type_cashier, $printer_pin_cashierReceipt);
-				
-				
+			$print_content_cashierReceipt = replace_to_printer_command($print_content_cashierReceipt, $printer_type_cashier, $printer_pin_cashierReceipt);
+			
 			$r = array('success' => false, 'info' => '', 'print' => array());
 			
 			//echo '<pre>';
-			//print_r($print_content);
+			//print_r($print_content_cashierReceipt);
 			//die();
 			
-			$r['print'][] = $print_content;
 			
 			//$r['print'][] = $print_content_cashierReceipt;
 			//DIRECT PRINT USING PHP - CASHIER PRINTER				
 			$is_print_error = false;
 			
-			if($data_printer['print_method'] == 'ESC/POS'){
-				try {
-					@$ph = printer_open($printer_ip_cashierReceipt);
-				} catch (Exception $e) {
-					$ph = false;
-				}
+			try {
+				$ph = printer_open($printer_ip_cashierReceipt);
+			} catch (Exception $e) {
+				$ph = false;
+			}
+			
+			//$ph = @printer_open($printer_ip_cashierReceipt);
+			
+			if($ph)
+			{	
+				printer_start_doc($ph, "SALES - SUPPLIER");
+				printer_start_page($ph);
+				printer_set_option($ph, PRINTER_MODE, "RAW");
+				printer_write($ph, $print_content_cashierReceipt);
+				printer_end_page($ph);
+				printer_end_doc($ph);
+				printer_close($ph);
+				$r['success'] = true;
 				
-				//$ph = @printer_open($printer_ip_cashierReceipt);
-				
-				if($ph)
-				{	
-					printer_start_doc($ph, "SALES - SUPPLIER");
-					printer_start_page($ph);
-					printer_set_option($ph, PRINTER_MODE, "RAW");
-					printer_write($ph, $print_content_cashierReceipt);
-					printer_end_page($ph);
-					printer_end_doc($ph);
-					printer_close($ph);
-					$r['success'] = true;
-					
-				}else{
-					$is_print_error = true;
-				}
-				
-				
-				$data_printer['escpos_pass'] = 1;
-				
-				if($is_print_error){					
-					$r['info'] .= 'Communication with Printer Cashier Failed!<br/>';
-					echo $r['info'];
-					die();
-				}
+			}else{
+				$is_print_error = true;
+			}
+			
+			if($is_print_error){					
+				echo 'Communication with Printer Cashier Failed!<br/>';
 			}
 			
 			//echo json_encode($r);
-			
-			printing_process($data_printer, $print_content, 'print');
-			
 			die();
 			
 		}
@@ -510,7 +465,7 @@ class ReportSalesBagiHasil extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 			$this->db->from($this->table." as a");

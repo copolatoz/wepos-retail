@@ -65,7 +65,7 @@ class ReportCancelOrder extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(b.created >= '".$qdate_from." 07:00:01' AND b.created <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(b.created >= '".$qdate_from." 00:00:00' AND b.created <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.updated as order_date, b.billing_no, c.product_name");
 			$this->db->from($this->table2." as a");

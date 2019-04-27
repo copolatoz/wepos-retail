@@ -219,7 +219,7 @@ class Login extends MX_Controller {
 						$ret_data['data']['merchant_accesspw'],
 						$ret_data['data']['merchant_port'],
 						$ret_data['data']['merchant_db'],
-						1
+						$view_multiple_store
 					);
 					
 					$config = array();
@@ -274,7 +274,7 @@ class Login extends MX_Controller {
 			$r = $this->m->submit($username, $password, $store_data, $mkey);
 		}
 		
-        if($r['count']==1)
+		if($r['count']==1)
         {
             $this->reg_session($r['data']);
 			$r['success'] = true;

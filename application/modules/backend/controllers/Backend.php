@@ -43,34 +43,34 @@ class Backend extends MY_Controller {
 			//}
 			
 			$included_styles = array(        
-				base_url().'assets/desktop/css/desktop.css', 
-				base_url().'assets/desktop/css/icons.css', 
-				base_url().'assets/desktop/icons/awesome/font-awesome.css', 
-				//base_url().'assets/desktop/css/extapp.css' , 
-				base_url().'assets/desktop/css/modules.css'    
+				BASE_URL.'assets/desktop/css/desktop.css', 
+				BASE_URL.'assets/desktop/css/icons.css', 
+				BASE_URL.'assets/desktop/icons/awesome/font-awesome.css', 
+				//BASE_URL.'assets/desktop/css/extapp.css' , 
+				BASE_URL.'assets/desktop/css/modules.css'    
 			);	
 			
 			
 			//JS-APPS MERGE
 			$included_js = array(        
-				base_url().'assets/js/extjs.4.2/ext-all.js', 
-				base_url().'apps/core/Constants.js', 
-				base_url().'apps/core/Module.js',
-				base_url().'apps/core/Widget.js',
-				base_url().'apps/core/LoadingBox.js',
-				base_url().'apps/core/MessageBox.js',
-				base_url().'apps/core/Application.js',
-				base_url().'apps/desktop/Desktop.js',
-				base_url().'apps/desktop/TaskBar.js',
-				base_url().'apps/desktop/TrayClock.js',
-				base_url().'apps/desktop/Wallpaper.js',
-				base_url().'apps/desktop/WallpaperModal.js',
-				base_url().'apps/desktop/StartMenu.js',
-				base_url().'apps/desktop/AboutModal.js',
-				base_url().'apps/desktop/model/ShortcutModel.js' ,
-				base_url().'apps/desktop/model/WallpaperModel.js',
-				base_url().'apps/Application.js',
-				base_url().'apps/startup/boot.js' 
+				BASE_URL.'assets/js/extjs.4.2/ext-all.js', 
+				BASE_URL.'apps/core/Constants.js', 
+				BASE_URL.'apps/core/Module.js',
+				BASE_URL.'apps/core/Widget.js',
+				BASE_URL.'apps/core/LoadingBox.js',
+				BASE_URL.'apps/core/MessageBox.js',
+				BASE_URL.'apps/core/Application.js',
+				BASE_URL.'apps/desktop/Desktop.js',
+				BASE_URL.'apps/desktop/TaskBar.js',
+				BASE_URL.'apps/desktop/TrayClock.js',
+				BASE_URL.'apps/desktop/Wallpaper.js',
+				BASE_URL.'apps/desktop/WallpaperModal.js',
+				BASE_URL.'apps/desktop/StartMenu.js',
+				BASE_URL.'apps/desktop/AboutModal.js',
+				BASE_URL.'apps/desktop/model/ShortcutModel.js' ,
+				BASE_URL.'apps/desktop/model/WallpaperModel.js',
+				BASE_URL.'apps/Application.js',
+				BASE_URL.'apps/startup/boot.js' 
 			);		
 			
 			$vars = array( 
@@ -101,7 +101,11 @@ class Backend extends MY_Controller {
 			$apps_js = $this->minifier->minify( $merge_apps_js, 'apps.min/core/application.min.js', config_item('program_version') );
 		}
 		
+		$opt_var = array('hide_tanya_wepos');
+		$get_opt = get_option_value($opt_var);
+		
 		$data_post = array(
+			'get_opt'	=> $get_opt,
 			'apps_css'	=> $apps_css,
 			'apps_js'	=> $apps_js
 		);
@@ -119,10 +123,10 @@ class Backend extends MY_Controller {
 		var ExtApp = {
 			version		: "'.config_item('program_version').'"	
 		};
-		ExtApp.BASE_PATH = "'.site_url().'";	
-		var serviceUrl      = "'.site_url().'backend/services";
-		var reportServiceUrl      = "'.site_url().'backend/reportServices?";
-		var appUrl      = "'.site_url().'";
+		ExtApp.BASE_PATH = "'.BASE_URL.'";	
+		var serviceUrl      = "'.BASE_URL.'backend/services";
+		var reportServiceUrl      = "'.BASE_URL.'backend/reportServices?";
+		var appUrl      = "'.BASE_URL.'";
         var id_client	= '.$this->session->userdata('client_id').';
         var client_structure_id	= '.$this->session->userdata('client_structure_id').';
         var id_client_unit	= '.$this->session->userdata('client_unit_id').';
@@ -140,11 +144,12 @@ class Backend extends MY_Controller {
         var programRelease = "'.config_item('program_release').'";
         var client_name_app = "'.config_item('client_name').'";
         var copyright   = "'.config_item('copyright').'";
+        var website_url   = "'.config_item('website').'";
         var one_day_unix= '.ONE_DAY_UNIX.';
         var date_today  = "'.date('d/m/Y').'";	
 		';
 		
-		$opt_var = array('merchant_tipe','merchant_key','produk_nama','produk_key','produk_expired',
+		$opt_var = array('merchant_tipe','merchant_key','produk_nama','produk_key','produk_expired','wepos_version',
 		'include_tax','include_service',
 		'default_tax_percentage','default_service_percentage',
 		'takeaway_no_tax','takeaway_no_service','role_id_kasir',
@@ -154,10 +159,40 @@ class Backend extends MY_Controller {
 		'print_qc_then_order','supervisor_pin_mode','default_discount_payment','print_qc_order_when_payment',
 		'use_item_sku','reservation_cashier','salesorder_cashier','autohold_create_billing',
 		'hide_button_invoice','hide_button_halfpayment','hide_button_mergebill','hide_button_splitbill',
-		'hide_button_logoutaplikasi','min_noncash','autobackup_on_settlement','no_hold_billing','print_preview_billing');
+		'hide_button_logoutaplikasi','min_noncash','autobackup_on_settlement','no_hold_billing',
+		'print_preview_billing','opsi_no_print_when_payment','must_choose_customer');
 		
 		$get_opt = get_option_value($opt_var);
+		
+		$update_var = array();
 		if(!empty($get_opt)){
+			
+			//delete soon - update for v.3.42.17 to v.3.42.20
+			if(empty($get_opt['merchant_tipe'])){
+				$get_opt['merchant_tipe'] = 'retail';
+				$update_var['merchant_tipe'] = 'retail';
+			}
+			if(empty($get_opt['produk_nama'])){
+				$get_opt['produk_nama'] = '';
+				$update_var['produk_nama'] = '';
+			}
+			if(empty($get_opt['merchant_key'])){
+				$get_opt['merchant_key'] = '';
+				$update_var['merchant_key'] = '';
+			}
+			if(empty($get_opt['produk_key'])){
+				$get_opt['produk_key'] = '';
+				$update_var['produk_key'] = '';
+			}
+			if(empty($get_opt['produk_expired'])){
+				$get_opt['produk_expired'] = '';
+				$update_var['produk_expired'] = '';
+			}
+			if(empty($get_opt['wepos_version'])){
+				$get_opt['wepos_version'] = '';
+				$update_var['wepos_version'] = '3.42.19';
+			}
+			
 			foreach($get_opt as $key => $dt){
 				
 				if($key == 'auto_logout_time'){
@@ -182,6 +217,10 @@ class Backend extends MY_Controller {
 				}
 				
 			}
+		}
+		
+		if(!empty($update_var)){
+			update_option($update_var);
 		}
 		
 		//AS CASHIER
@@ -209,8 +248,6 @@ class Backend extends MY_Controller {
 		//REPORT PATH
 		echo '
 		ExtApp.asCashier = '.$asCashier.';
-        var ReportViewerURL   =   "'.site_url().'reports/core/index.php?stimulsoft_client_key=ViewerFx";
-        var ReportDesignerURL =   "'.site_url().'reports/core/index.php?stimulsoft_client_key=DesignerFx";
 		';
 		
 		//MODULES-MENU INIT

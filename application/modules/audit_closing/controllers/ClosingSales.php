@@ -515,7 +515,7 @@ class ClosingSales extends MY_Controller {
 		$qdate_till = date("Y-m-d",strtotime($date_till));
 		$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 		
-		$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+		$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
 		
 		$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 		$this->db->from($this->table_billing." as a");

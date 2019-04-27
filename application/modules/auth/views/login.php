@@ -7,16 +7,16 @@
     <meta name="author" content="<?php echo $meta_author; ?>">
     <meta name="keywords" content="<?php echo $meta_keywords; ?>">
 
-    <link rel="shortcut icon" href="<?php echo base_url(); ?>assets/themes/frontend/images/favicon.ico" />
-	<link href="<?php echo base_url(); ?>assets/themes/frontend/css/modern.css" rel="stylesheet">
-    <link href="<?php echo base_url(); ?>assets/themes/frontend/css/site-red.css" rel="stylesheet" type="text/css">
+    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>assets/themes/frontend/images/favicon.ico" />
+	<link href="<?php echo BASE_URL; ?>assets/themes/frontend/css/modern.css" rel="stylesheet">
+    <link href="<?php echo BASE_URL; ?>assets/themes/frontend/css/site-red.css" rel="stylesheet" type="text/css">
 	
-	<script type="text/javascript" src="<?php echo base_url(); ?>assets/themes/frontend/js/jquery-1.9.0.min.js"></script>
-    <script type="text/javascript" src="<?php echo base_url(); ?>assets/themes/frontend/js/buttonset.js"></script>
-    <script type="text/javascript" src="<?php echo base_url(); ?>assets/themes/frontend/js/input-control.js"></script>
+	<script type="text/javascript" src="<?php echo BASE_URL; ?>assets/themes/frontend/js/jquery-1.9.0.min.js"></script>
+    <script type="text/javascript" src="<?php echo BASE_URL; ?>assets/themes/frontend/js/buttonset.js"></script>
+    <script type="text/javascript" src="<?php echo BASE_URL; ?>assets/themes/frontend/js/input-control.js"></script>
 	
 	<script>
-		var appUrl 		= "<?php echo site_url(); ?>";
+		var appUrl 		= "<?php echo BASE_URL; ?>";
 		var programName	= "<?php echo config_item('program_name'); ?>";
 		var copyright	= "<?php echo config_item('copyright'); ?>";
 	</script>
@@ -129,6 +129,9 @@
 				// Check fields
 				var loginUsername = $('#loginUsername').val();
 				var loginPassword = $('#loginPassword').val();
+				var view_multiple_store = $('#view_multiple_store').val();
+				var store_data = $('#store_data').val();
+				var mkey = $('#mkey').val();
 				
 				if (!loginUsername || loginUsername.length == 0)
 				{
@@ -161,7 +164,10 @@
 					var data = {
 						a: $('#a').val(),
 						loginUsername: loginUsername,
-						loginPassword: loginPassword
+						loginPassword: loginPassword,
+						view_multiple_store: view_multiple_store,
+						store_data: store_data,
+						mkey:mkey
 					};
 					
 					var redirect 	= appUrl+'backend';
@@ -254,7 +260,15 @@
             <div class="grid" style="">
                 <div class="row">
                     <div class="span4">
-                        <h1 class="icon-user-3 fg-color-darken" > LOGIN</h1>
+                        
+						<?php
+						if(!empty($cloud_data)){
+							echo '<h2 class="icon-user-3 fg-color-darken" > LOGIN MERCHANT</h2>';
+						}else{
+							echo '<h1 class="icon-user-3 fg-color-darken" > LOGIN</h1>';
+						}
+						?>
+						
                     </div>
                 </div>               
             </div>
@@ -285,7 +299,8 @@
 									echo '<input type="hidden" name="view_multiple_store" id="view_multiple_store" value="0" />';
 								}
 								?>
-
+								<input type="hidden" name="mkey" id="mkey" value="<?php echo $mkey; ?>" />
+								
 								<div class="input-control text loginUsername">
 									<input type="text" id="loginUsername" name="loginUsername" class="with-helper" tabindex="0" placeholder="Username"/>
 									<a href="javascript:void(0);" class="helper loginUsername"></a>
@@ -302,15 +317,23 @@
 							</div>
 							<div class="clearfix"></div>
 							<div id="loadBox" class="padding20" style="display:none; text-align:center;">
-								<img src="<?php echo base_url(); ?>assets/themes/frontend/images/loader.gif" width="64"/>
+								<img src="<?php echo BASE_URL; ?>assets/themes/frontend/images/loader.gif" width="64"/>
 							</div>
 							
 						</form>
 						<div class="clearfix"></div>
-						<br/>
 						<div class="footer_login">
-							<p><?php echo config_item('program_name'); ?></p>
-							<?php echo config_item('copyright'); ?><br/>
+							
+							<?php
+							if(!empty($cloud_data)){
+								echo '<p>'.$cloud_data['merchant_nama'].'</p>';
+							}else{
+								echo '<p>'.config_item('program_name').'</p>';
+							}
+							
+							echo config_item('copyright'); 
+							?>
+							<br/>
 							
 						</div>
                     </div>

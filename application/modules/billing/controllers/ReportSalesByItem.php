@@ -93,28 +93,24 @@ class ReportSalesByItem extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(b.payment_date >= '".$qdate_from." 07:00:00' AND b.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(b.payment_date >= '".$qdate_from." 00:00:00' AND b.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			//b.tax_total, b.service_total,
 			//b.include_tax, b.tax_percentage, b.include_service, b.service_percentage, b.is_compliment,
 			$this->db->select("a.*, b.billing_no, b.total_billing, b.discount_perbilling, b.payment_id,
 								b.discount_percentage as billing_discount_percentage, b.discount_total as billing_discount_total,
 								b.total_pembulatan as billing_total_pembulatan, b.payment_date,
-								c.product_name, c.product_group, c.category_id, d.product_category_name as category_name,
+								c.product_name, c.product_code, c.product_group, c.category_id, d.product_category_code as category_code, d.product_category_name as category_name,
 								c.id_ref_item, c2.item_code, c2.item_sku, e.item_category_code, e.item_category_name,
-								f.item_subcategory1_code, f.item_subcategory1_name, g.item_subcategory2_code, g.item_subcategory2_name, 
-								h.item_subcategory3_code, h.item_subcategory3_name, i.item_subcategory4_code, i.item_subcategory4_name");
+								f.item_subcategory_code, f.item_subcategory_name");
 			$this->db->from($this->table2." as a");
 			$this->db->join($this->prefix.'billing as b','b.id = a.billing_id','LEFT');
 			$this->db->join($this->prefix.'product as c','c.id = a.product_id','LEFT');
 			$this->db->join($this->prefix.'items as c2','c2.id = c.id_ref_item','LEFT');
 			$this->db->join($this->prefix.'product_category as d','d.id = c.category_id','LEFT');
-			$this->db->where("(a.order_status != 'cancel' AND a.order_qty > 0)");	
 			$this->db->join($this->prefix.'item_category as e','e.id = c2.category_id','LEFT');
-			$this->db->join($this->prefix.'item_subcategory1 as f','f.id = c2.subcategory1_id','LEFT');
-			$this->db->join($this->prefix.'item_subcategory2 as g','g.id = c2.subcategory2_id','LEFT');
-			$this->db->join($this->prefix.'item_subcategory3 as h','h.id = c2.subcategory3_id','LEFT');
-			$this->db->join($this->prefix.'item_subcategory4 as i','i.id = c2.subcategory4_id','LEFT');
+			$this->db->join($this->prefix.'item_subcategory as f','f.id = c2.subcategory_id','LEFT');
+			$this->db->where("(a.order_status != 'cancel' AND a.order_qty > 0)");	
 			$this->db->where("a.is_deleted", 0);
 			$this->db->where("b.is_deleted", 0);
 			$this->db->where("b.billing_status", "paid");			
@@ -123,7 +119,9 @@ class ReportSalesByItem extends MY_Controller {
 			
 			if(!empty($tipe)){
 				if($tipe != 'null'){
-					$this->db->where("b.table_id", $tipe);
+					if($tipe > 0){
+						$this->db->where("b.table_id", $tipe);
+					}
 				}
 			}
 			if(!empty($find_sku)){
@@ -206,21 +204,17 @@ class ReportSalesByItem extends MY_Controller {
 								'payment_date'	=> $payment_date,
 								'product_id'	=> $s['product_id'],
 								'product_name'	=> $s['product_name'],
+								'product_code'	=> $s['product_code'],
 								'item_code'		=> $s['item_code'],
 								'item_sku'		=> $s['item_sku'],
 								'product_group'	=> $s['product_group'],
 								'category_id'	=> $s['category_id'],
 								'category_name'	=> $s['category_name'],
+								'category_code'	=> $s['category_code'],
 								'item_category_code'=> $s['item_category_code'],
 								'item_category_name'=> $s['item_category_name'],
-								'item_subcategory1_code'	=> $s['item_subcategory1_code'],
-								'item_subcategory1_name'	=> $s['item_subcategory1_name'],
-								'item_subcategory2_code'	=> $s['item_subcategory2_code'],
-								'item_subcategory2_name'	=> $s['item_subcategory2_name'],
-								'item_subcategory3_code'		=> $s['item_subcategory3_code'],
-								'item_subcategory3_name'		=> $s['item_subcategory3_name'],
-								'item_subcategory4_code'		=> $s['item_subcategory4_code'],
-								'item_subcategory4_name'		=> $s['item_subcategory4_name'],
+								'item_subcategory_code'	=> $s['item_subcategory_code'],
+								'item_subcategory_name'	=> $s['item_subcategory_name'],
 								'total_qty'	=> 0,
 								'total_billing'	=> 0,
 								'total_billing_show'	=> 0,
@@ -1119,70 +1113,48 @@ class ReportSalesByItem extends MY_Controller {
 			}
 			
 
-
 			//GROUPING
 			$new_GroupData = array();
+			$category_name = array();
 			$item_category_name = array();
 			$item_departemen_name = array();
-			$item_subcategory1_name = array();
-			$item_subcategory2_name = array();
-			$item_subcategory3_name = array();
-			$item_subcategory4_name = array();
+			$item_subcategory_name = array();
 			$item_sku_name = array();
 			if(!empty($groupCat)){
 				
-				if($groupCat == 'cat'){
+				if($groupCat == 'cat_profit'){
+					
 					foreach($newData as $dt){
-						if(empty($new_GroupData[$dt['item_category_code']])){
-							$new_GroupData[$dt['item_category_code']] = array();
+						if(empty($new_GroupData[$dt['category_code']])){
+							$new_GroupData[$dt['category_code']] = array();
 						}
 							
-						$new_GroupData[$dt['item_category_code']][] = $dt;
+						$new_GroupData[$dt['category_code']][] = $dt;
+						$category_name[$dt['category_code']] = $dt['category_name'];
+						$item_category_name[$dt['item_category_code']] = $dt['item_category_name'];
+					}
+				}
+				
+				if($groupCat == 'cat'){
+					foreach($newData as $dt){
+						if(empty($new_GroupData[$dt['category_code']])){
+							$new_GroupData[$dt['category_code']] = array();
+						}
+							
+						$new_GroupData[$dt['category_code']][] = $dt;
+						$category_name[$dt['category_code']] = $dt['category_name'];
 						$item_category_name[$dt['item_category_code']] = $dt['item_category_name'];
 					}
 				}
 				
 				if($groupCat == 'subcat1'){
 					foreach($newData as $dt){
-						if(empty($new_GroupData[$dt['item_subcategory1_code']])){
-							$new_GroupData[$dt['item_subcategory1_code']] = array();
+						if(empty($new_GroupData[$dt['item_subcategory_code']])){
+							$new_GroupData[$dt['item_subcategory_code']] = array();
 						}
 							
-						$new_GroupData[$dt['item_subcategory1_code']][] = $dt;
-						$item_subcategory1_name[$dt['item_subcategory1_code']] = $dt['item_subcategory1_name'];
-					}
-				}
-				
-				if($groupCat == 'subcat2'){
-					foreach($newData as $dt){
-						if(empty($new_GroupData[$dt['item_subcategory2_code']])){
-							$new_GroupData[$dt['item_subcategory2_code']] = array();
-						}
-							
-						$new_GroupData[$dt['item_subcategory2_code']][] = $dt;
-						$item_subcategory2_name[$dt['item_subcategory2_code']] = $dt['item_subcategory2_name'];
-					}
-				}
-				
-				if($groupCat == 'subcat3'){
-					foreach($newData as $dt){
-						if(empty($new_GroupData[$dt['item_subcategory3_code']])){
-							$new_GroupData[$dt['item_subcategory3_code']] = array();
-						}
-							
-						$new_GroupData[$dt['item_subcategory3_code']][] = $dt;
-						$item_subcategory3_name[$dt['item_subcategory3_code']] = $dt['item_subcategory3_name'];
-					}
-				}
-				
-				if($groupCat == 'subcat4'){
-					foreach($newData as $dt){
-						if(empty($new_GroupData[$dt['item_subcategory4_code']])){
-							$new_GroupData[$dt['item_subcategory4_code']] = array();
-						}
-							
-						$new_GroupData[$dt['item_subcategory4_code']][] = $dt;
-						$item_subcategory4_name[$dt['item_subcategory4_code']] = $dt['item_subcategory4_name'];
+						$new_GroupData[$dt['item_subcategory_code']][] = $dt;
+						$item_subcategory_name[$dt['item_subcategory_code']] = $dt['item_subcategory_name'];
 					}
 				}
 				
@@ -1267,12 +1239,10 @@ class ReportSalesByItem extends MY_Controller {
 			
 			$data_post['report_data'] = $newData;
 			$data_post['payment_data'] = $dt_payment_name;
+			$data_post['category_name'] = $category_name;
 			$data_post['item_category_name'] = $item_category_name;
 			$data_post['groupCat'] = $groupCat;
-			$data_post['item_subcategory1_name'] = $item_subcategory1_name;
-			$data_post['item_subcategory2_name'] = $item_subcategory2_name;
-			$data_post['item_subcategory3_name'] = $item_subcategory3_name;
-			$data_post['item_subcategory4_name'] = $item_subcategory4_name;
+			$data_post['item_subcategory_name'] = $item_subcategory_name;
 			$data_post['item_sku_name'] = $item_sku_name;
 						
 		}
@@ -1435,11 +1405,20 @@ class ReportSalesByItem extends MY_Controller {
 				}
 				
 			}else
-			{
+			if($groupCat == 'cat_profit'){
 				
+				$useview = 'print_reportProfitSalesByItemCategory';
+				$data_post['report_name'] = 'SALES PROFIT BY ITEM CATEGORY';
+				
+				if($do == 'excel'){
+					$useview = 'excel_reportProfitSalesByItemCategory';
+				}
+				
+			}else
+			{
 				if($useview == 'print_reportProfitSalesByItemCategory'){
 					
-					$data_post['report_name'] = 'SALES PROFIT REPORT BY ITEM CATEGORY';
+					$data_post['report_name'] = 'SALES PROFIT BY ITEM CATEGORY';
 					
 					if($do == 'excel'){
 						$useview = 'excel_reportProfitSalesByItemCategory';

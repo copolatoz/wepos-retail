@@ -18,7 +18,7 @@ class CloseCashierShift extends MY_Controller {
 		$id_user = $this->session->userdata('id_user');
 		$ip_addr = get_client_ip();
 		if(empty($session_user)){
-			$r = array('success' => false, 'info' => 'User Session Expired, Please Re-Login!');
+			$r = array('success' => false, 'info' => 'Sesi Login sudah habis, Silahkan Login ulang!');
 			echo json_encode($r);
 			die();
 		}
@@ -146,7 +146,7 @@ class CloseCashierShift extends MY_Controller {
 		
 		$ip_addr = get_client_ip();
 		if(empty($session_user)){
-			$r = array('success' => false, 'info' => 'User Session Expired, Please Re-Login!');
+			$r = array('success' => false, 'info' => 'Sesi Login sudah habis, Silahkan Login ulang!');
 			echo json_encode($r);
 			die();
 		}
@@ -238,7 +238,7 @@ class CloseCashierShift extends MY_Controller {
 		$id_user = $this->session->userdata('id_user');
 		$ip_addr = get_client_ip();
 		if(empty($session_user)){
-			$r = array('success' => false, 'info' => 'User Session Expired, Please Re-Login!');
+			$r = array('success' => false, 'info' => 'Sesi Login sudah habis, Silahkan Login ulang!');
 			echo json_encode($r);
 			die();
 		}
@@ -463,7 +463,10 @@ class CloseCashierShift extends MY_Controller {
 			
 			if(!empty($get_opt['diskon_sebelum_pajak_service'])){
 				$data_post['diskon_sebelum_pajak_service'] = $get_opt['diskon_sebelum_pajak_service'];
+			}else{
+				$data_post['diskon_sebelum_pajak_service'] =  0;
 			}
+			
 			if(empty($get_opt['cashier_max_pembulatan'])){
 				$get_opt['cashier_max_pembulatan'] = 0;
 			}
@@ -493,7 +496,7 @@ class CloseCashierShift extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 			$this->db->from($this->table_billing." as a");

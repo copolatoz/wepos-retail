@@ -104,6 +104,7 @@ class MasterSupplier extends MY_Controller {
 				{
 					$s['supplier_status_text'] = '<span style="color:red;font-weight:bold;">Blacklist</span>';
 				}
+				$s['source_from'] = ucwords($s['source_from']);
 				
 				array_push($newData, $s);
 			}
@@ -133,11 +134,42 @@ class MasterSupplier extends MY_Controller {
 		if(empty($supplier_name)){
 			$r = array('success' => false);
 			die(json_encode($r));
+		}			
+		
+		if(empty($supplier_status)){
+			$supplier_status = 'ok';
 		}		
 		
 		$is_active = $this->input->post('is_active');
 		if(empty($is_active)){
 			$is_active = 0;
+		}
+		
+		//CHECK CODE
+		if(!empty($supplier_code)){
+			$id = $this->input->post('id', true);
+			$this->db->from($this->table);
+			$this->db->where("supplier_code = '".$supplier_code."'");
+			if(!empty($id)){
+				$this->db->where("id != ".$id);
+			}
+			$this->db->where("is_deleted = 0");
+			$get_last = $this->db->get();
+			if($get_last->num_rows() > 0){
+				
+				//available
+				$r = array('success' => false, 'info' => 'Kode sudah digunakan!'); 
+				die(json_encode($r));
+		
+			}else{
+				$get_code = $this->generate_supplier_code($supplier_code);
+				$supplier_code = $get_code['supplier_code'];
+				$supplier_no = $get_code['supplier_no'];
+			}
+		}else{
+			$get_code = $this->generate_supplier_code();
+			$supplier_code = $get_code['supplier_code'];
+			$supplier_no = $get_code['supplier_no'];
 		}
 			
 		$r = '';
@@ -154,14 +186,19 @@ class MasterSupplier extends MY_Controller {
 				    'supplier_email'  	=> 	$supplier_email,
 				    'supplier_status'  	=> 	$supplier_status,
 				    'keterangan_blacklist'  	=> 	$keterangan_blacklist,
-					'created'		=>	date('Y-m-d H:i:s'),
+					'source_from'  	=> 	'MERCHANT',
+				    'created'		=>	date('Y-m-d H:i:s'),
 					'createdby'		=>	$session_user,
 					'updated'		=>	date('Y-m-d H:i:s'),
 					'updatedby'		=>	$session_user,
 					'is_active'	=>	$is_active
 				),
 				'table'		=>  $this->table
-			);	
+			);		
+			
+			if(!empty($supplier_no)){
+				$var['fields']['supplier_no'] = $supplier_no;
+			}
 			
 			//SAVE
 			$insert_id = false;
@@ -197,6 +234,10 @@ class MasterSupplier extends MY_Controller {
 				'table'			=>  $this->table,
 				'primary_key'	=>  'id'
 			);
+			
+			if(!empty($supplier_no)){
+				$var['fields']['supplier_no'] = $supplier_no;
+			}
 			
 			//UPDATE
 			$id = $this->input->post('id', true);
@@ -277,6 +318,68 @@ class MasterSupplier extends MY_Controller {
 		}
 		
 		
+	}
+	
+	public function generate_supplier_code($cek_code = ''){
+		
+		$this->table = $this->prefix.'supplier';		
+
+		$getDate = date("ym");
+		
+		$prefix_supplier_code = 'SPL'.date("ym");
+		$code_format = '{Supplier}{SupplierNo}';
+		$no_length = 4;
+		
+		if(!empty($cek_code)){
+			$get_supplier_no = substr($cek_code, $no_length*-1);
+			$supplier_no = (int) $get_supplier_no;
+			return array('supplier_no' => $supplier_no, 'supplier_code' => $cek_code);
+		}
+		
+		$repl_attr = array(
+			"{Supplier}" => $prefix_supplier_code,
+		);
+		
+		$supplier_code = strtr($code_format, $repl_attr);
+		//$supplier_code = $prefix_supplier_code.'0001';
+		
+		$this->db->from($this->table);
+		$this->db->where("supplier_code LIKE '".$prefix_supplier_code."%'");
+		$this->db->where("is_deleted = 0");
+		$this->db->order_by('supplier_no', 'DESC');
+		$this->db->order_by('supplier_code', 'DESC');
+		$get_last = $this->db->get();
+		if($get_last->num_rows() > 0){
+			$data_supplier_code = $get_last->row();
+			
+			$length_code = strlen($prefix_supplier_code);
+			$get_supplier_no = substr($data_supplier_code->supplier_code, $length_code, $no_length);
+			$supplier_no = (int) $get_supplier_no;
+		
+			if(!empty($data_supplier_code->supplier_no)){
+				$supplier_no = $data_supplier_code->supplier_no;
+			}		
+			
+		}else{
+			$supplier_no = 0;
+		}
+		
+		$supplier_no++;
+		
+		$supplier_no_add = $supplier_no;
+		$length_no = strlen($supplier_no);
+		if($length_no <= $no_length){
+			$gapTxt = $no_length - $length_no;
+			$supplier_no_add = str_repeat("0", $gapTxt).$supplier_no;
+		}
+		
+		$repl_attr = array(
+			"{SupplierNo}"		=> $supplier_no_add
+		);
+		
+		$supplier_code = strtr($supplier_code, $repl_attr);
+		
+		return array('supplier_no' => $supplier_no, 'supplier_code' => $supplier_code);				
 	}
 	
 }

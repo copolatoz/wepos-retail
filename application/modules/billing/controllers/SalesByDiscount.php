@@ -71,7 +71,7 @@ class SalesByDiscount extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$billing_promo = array();
 			$billing_promo_discount_id = array();
@@ -1056,7 +1056,7 @@ class SalesByDiscount extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$billing_promo = array();
 			$billing_promo_discount_id = array();

@@ -58,21 +58,18 @@ $route['logout'] = 'auth/login/logout';
 $route['login.html'] = 'auth/login/index';
 $route['login'] = 'auth/login/index';
 $route['login/(:any)'] = 'auth/login/index/$1';
+$route['merchant'] = 'auth/merchant/index';
+$route['merchant/(:any)'] = 'auth/merchant/index/$1';
+$route['m'] = 'auth/merchant/index';
+$route['m/(:any)'] = 'auth/merchant/index/$1';
 $route['backend'] = 'backend';
 
 //FIXBUGS
 $route['fixbugs'] = 'fixbugs/index';
 $route['fixbugs/(:any)'] = 'fixbugs/index/$1';
+$route['fixbugs/(:any)/(:any)'] = 'fixbugs/index/$1/$2';
 
 $route['404_override'] = 'auth/error404';
 $route['translate_uri_dashes'] = FALSE;
 
-
-/*
-| -------------------------------------------------------------------------
-| Sample REST API Routes
-| -------------------------------------------------------------------------
-*/
-$route['api/example/users/(:num)'] = 'api/example/users/id/$1'; // Example 4
-$route['api/example/users/(:num)(\.)([a-zA-Z0-9_-]+)(.*)'] = 'api/example/users/id/$1/format/$3$4'; // Example 8
 

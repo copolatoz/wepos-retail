@@ -71,7 +71,7 @@ class ReportSales extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 			$this->db->from($this->table." as a");
@@ -444,7 +444,7 @@ class ReportSales extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 			$this->db->from($this->table." as a");
@@ -1009,7 +1009,7 @@ class ReportSales extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.user_firstname, e.user_lastname, f.bank_name");
 			$this->db->from($this->table." as a");
@@ -1396,7 +1396,7 @@ class ReportSales extends MY_Controller {
 			$qdate_from = date("Y-m-d",strtotime($date_from));
 			$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
 			
-			//$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_from_plus1." 06:00:00')";
+			//$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_from_plus1." 23:59:59')";
 			
 			$where_shift_billing = '';
 			if(!empty($shift_billing)){
@@ -1406,7 +1406,7 @@ class ReportSales extends MY_Controller {
 				$this->db->from($this->prefix.'open_close_shift');
 				$this->db->where("user_shift",$shift_billing);
 				$this->db->where("(tanggal_shift = '".$qdate_from."' OR (tipe_shift = 'close' AND tanggal_shift = '".$qdate_till_max."' 
-				AND created <= '".$qdate_till_max." 06:00:00'))");
+				AND created <= '".$qdate_till_max." 23:59:59'))");
 				$get_shift = $this->db->get();
 				
 				if($get_shift->num_rows() > 0){
@@ -1434,12 +1434,12 @@ class ReportSales extends MY_Controller {
 						//FROM
 						if(empty($data_shift[$shift_billing]['jam_from'])){
 							if($shift_billing == 1){
-								$data_shift[$shift_billing]['jam_from'] = '07:00'; //default													
+								$data_shift[$shift_billing]['jam_from'] = '00:00'; //default													
 								$qdate_till_max = date("Y-m-d",strtotime($date_from));
 							}
 							
 							if($shift_billing == 2){
-								$data_shift[$shift_billing]['jam_from'] = '07:00:00'; //default
+								$data_shift[$shift_billing]['jam_from'] = '00:00:00'; //default
 								if(!empty($data_shift[1]['jam_till'])){
 									//take from shift 1
 									$data_shift[$shift_billing]['jam_from'] = $data_shift[1]['jam_till'].':59';
@@ -1452,7 +1452,7 @@ class ReportSales extends MY_Controller {
 						//TILL
 						if(empty($data_shift[$shift_billing]['jam_till'])){
 							if($shift_billing == 1){
-								$data_shift[$shift_billing]['jam_till'] = '06:00:00'; //default
+								$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
 								if(!empty($data_shift[2]['jam_from'])){
 									//take from shift 2
 									$data_shift[$shift_billing]['jam_till'] = $data_shift[1]['jam_from'].':00';
@@ -1460,7 +1460,7 @@ class ReportSales extends MY_Controller {
 							}
 							
 							if($shift_billing == 2){
-								$data_shift[$shift_billing]['jam_till'] = '06:00:00'; //default
+								$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
 							}
 							
 						}else{
@@ -1492,9 +1492,9 @@ class ReportSales extends MY_Controller {
 					}
 				}else{
 					
-					//$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:01' AND '24:00:00')";
+					//$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:00' AND '24:00:00')";
 					//$where_shift_billing = '(a.id = "-1")';
-					$where_shift_billing = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+					$where_shift_billing = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 						
 					
 				}
@@ -1507,8 +1507,8 @@ class ReportSales extends MY_Controller {
 				}
 				
 			}else{
-				//$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:01' AND '24:00:00')";
-				$where_shift_billing = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+				//$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:00' AND '24:00:00')";
+				$where_shift_billing = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 			}
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.user_firstname, e.user_lastname, f.bank_name");
@@ -1865,10 +1865,11 @@ class ReportSales extends MY_Controller {
 			'report_name'	=> 'CANCEL BILLING REPORT',
 			'date_from'	=> $date_from,
 			'date_till'	=> $date_till,
-			'user_fullname'	=> $user_fullname
+			'user_fullname'	=> $user_fullname,
+			'diskon_sebelum_pajak_service'	=> 0
 		);
 		
-		$get_opt = get_option_value(array('report_place_default'));
+		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -1891,7 +1892,7 @@ class ReportSales extends MY_Controller {
 			$qdate_till = date("Y-m-d",strtotime($date_till));
 			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
 			
-			$add_where = "(a.updated >= '".$qdate_from." 07:00:01' AND a.updated <= '".$qdate_till_max." 06:00:00')";
+			$add_where = "(a.updated >= '".$qdate_from." 00:00:00' AND a.updated <= '".$qdate_till_max." 23:59:59')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name, f.billing_no as merge_no");
 			$this->db->from($this->table." as a");

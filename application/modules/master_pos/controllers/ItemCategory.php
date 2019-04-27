@@ -66,11 +66,14 @@ class itemCategory extends MY_Controller {
 		
 		if(!empty($get_data['data'])){
 			foreach ($get_data['data'] as $s){
+				$s['item_category_code'] = strtoupper($s['item_category_code']);
+				
 				$s['is_active_text'] = ($s['is_active'] == '1') ? '<span style="color:green;">Active</span>':'<span style="color:red;">Inactive</span>';
 				$s['item_category_code_name'] = $s['item_category_code'].' - '.$s['item_category_name'];
 				
 				if(empty($s['item_category_code'])){
-					$s['item_category_code_name'] = $s['item_category_name'];
+					//$s['item_category_code'] = substr($s['item_category_name'],0,3);
+					$s['item_category_code_name'] = substr($s['item_category_name'],0,3);
 				}
 				
 				array_push($newData, $s);

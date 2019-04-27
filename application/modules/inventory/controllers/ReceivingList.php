@@ -332,6 +332,9 @@ class ReceivingList extends MY_Controller {
 			die(json_encode($r));
 		}
 		
+		$get_opt = get_option_value(array("as_server_backup"));
+		cek_server_backup($get_opt);
+		
 		$supplier_id = $this->input->post('supplier_id');
 		$receive_date = $this->input->post('receive_date');
 		$receive_memo = $this->input->post('receive_memo');
@@ -349,6 +352,10 @@ class ReceivingList extends MY_Controller {
 		
 		if(empty($storehouse_id)){
 			$storehouse_id = $this->stock->get_primary_storehouse();
+		}
+		
+		if(!empty($storehouse_id)){
+			$this->stock->cek_storehouse_access($storehouse_id);
 		}
 		
 		if(empty($storehouse_id)){
@@ -369,11 +376,18 @@ class ReceivingList extends MY_Controller {
 			$total_item = count($receiveDetail);
 			foreach($receiveDetail as $key => $dtDet){
 				$total_receive_item += $dtDet['receive_det_qty'];
-				
+				$dtDet['data_stok_kode_unik'] = trim($dtDet['data_stok_kode_unik']);
 				//UNIK KODE
 				if($dtDet['use_stok_kode_unik'] == 1){
+					
+					if(empty($dtDet['data_stok_kode_unik'])){
+						$r = array('success' => false, 'info' => 'Kode (SN/IMEI) pada Item: '.$dtDet['item_name'].' tidak boleh kosong!'); 
+						die(json_encode($r));
+					}
+					
 					$list_dt_kode = explode("\n",$dtDet['data_stok_kode_unik']);
 					foreach($list_dt_kode as $dt){
+						$dt = trim($dt);
 						if(!empty($dt)){
 							if(!in_array($dt, $all_unik_kode)){
 								$all_unik_kode[] = $dt;
@@ -398,7 +412,7 @@ class ReceivingList extends MY_Controller {
 				if(!empty($all_unik_kode_perkey[$key])){
 					$receiveDetail[$key]['data_stok_kode_unik'] = implode("\n", $all_unik_kode_perkey[$key]);
 					
-					if(!empty($dtDet['returd_qty']) AND $dtDet['receive_det_qty'] != count($all_unik_kode_perkey[$key])){
+					if($dtDet['receive_det_qty'] != count($all_unik_kode_perkey[$key])){
 						$r = array('success' => false, 'info' => 'Total Unik Kode (SN/IMEI) pada Item: '.$dtDet['item_name'].' tidak sesuai dengan Total Qty yang diterima'); 
 						die(json_encode($r));
 					}
@@ -407,7 +421,6 @@ class ReceivingList extends MY_Controller {
 				
 			}
 		}
-		
 		
 		$get_receive_number = $this->generate_receive_number();
 		
@@ -462,6 +475,10 @@ class ReceivingList extends MY_Controller {
 			$update_stok = '';
 			if($receive_status == 'done'){
 				
+				if(!empty($all_unik_kode)){
+					$this->cek_unik_kode($all_unik_kode);
+				}
+				
 				//cek warehouse
 				$default_warehouse = $this->stock->get_primary_storehouse();
 				if(empty($default_warehouse)){
@@ -505,32 +522,6 @@ class ReceivingList extends MY_Controller {
 			if($save_data)
 			{  
 				$id = $insert_id;
-				
-				
-				/*
-				$r = array('success' => true, 'id' => $insert_id, 'receive_number'	=> '-', 'det_info' => array());
-				$q_det = $this->m2->receiveDetail($receiveDetail, $insert_id, $update_stok);
-				if(!empty($q_det['dtReceive']['receive_number'])){
-					$r['receive_number'] = $q_det['dtReceive']['receive_number'];
-				}
-				$r['det_info'] = $q_det;
-				
-				
-				if(!empty($q_det['update_stock'])){
-					
-					$post_params = array(
-						'storehouse_item'	=> $q_det['update_stock']
-					);
-					
-					$updateStock = $this->stock->update_stock_rekap($post_params);
-					
-				}
-				
-				
-				$updatePO = $this->m4->update_status_PO($po_id);
-				*/
-				
-				
 			}
       		
 		}else
@@ -585,6 +576,9 @@ class ReceivingList extends MY_Controller {
 			
 			if($old_data['receive_status'] == 'progress' AND $receive_status == 'done'){
 				
+				if(!empty($all_unik_kode)){
+					$this->cek_unik_kode($all_unik_kode);
+				}
 				
 				//cek warehouse
 				$default_warehouse = $this->stock->get_primary_storehouse();
@@ -618,6 +612,11 @@ class ReceivingList extends MY_Controller {
 			}
 			
 			if($old_data['receive_status'] == 'done' AND $receive_status == 'progress'){
+				
+				if(!empty($all_unik_kode)){
+					$this->cek_unik_kode($all_unik_kode, true);
+				}
+				
 				$do_update_rollback_stok = true;
 				$do_update_status_po = true;
 				
@@ -645,12 +644,12 @@ class ReceivingList extends MY_Controller {
 						$r = array('success' => false, 'info' => 'Tidak boleh update status ke Progress<br/>Silahkan Cek Status AP/Hutang: '.$dt_ap->ap_no.',<br/>AP/Hutang sudah selesai s/d pembayaran'); 
 						die(json_encode($r));
 					}else{
-						$r = array('success' => false, 'info' => 'Tidak boleh update status ke Progress<br/>Silahkan Cek Status AP/Hutang: '.$dt_ap->ap_no.',<br/>AP/Hutang sudah sampai tahap Jurnal/Posting ke Bag.Keuangan'); 
+						$r = array('success' => false, 'info' => 'Tidak boleh update status ke Progress<br/>Silahkan Cek Status AP/Hutang: '.$dt_ap->ap_no.', <br/>AP/Hutang sudah sampai tahap Jurnal/Posting ke Bag.Keuangan'); 
 						die(json_encode($r));
 					}
 					
 					
-				}	
+				}
 			}
 			
 			$this->lib_trans->begin();
@@ -763,6 +762,9 @@ class ReceivingList extends MY_Controller {
 	public function delete()
 	{
 		
+		$get_opt = get_option_value(array("as_server_backup"));
+		cek_server_backup($get_opt);
+		
 		$this->table = $this->prefix.'receiving';
 		$this->table2 = $this->prefix.'receive_detail';
 		
@@ -863,6 +865,8 @@ class ReceivingList extends MY_Controller {
 	
 	public function deleteDetail()
 	{
+		$get_opt = get_option_value(array("as_server_backup"));
+		cek_server_backup($get_opt);
 		
 		$this->table = $this->prefix.'receive_detail';
 		
@@ -912,6 +916,59 @@ class ReceivingList extends MY_Controller {
 		}
 		
 		return $total_qty;
+	}
+	
+	public function cek_unik_kode($all_unik_kode = '', $is_rollback = false){
+		$this->table = $this->prefix.'item_kode_unik';	
+		
+		if(!empty($all_unik_kode)){
+			
+			$all_unik_kode_sql = implode("','", $all_unik_kode);
+			if($is_rollback == true){
+				$this->table = $this->prefix.'item_kode_unik_log';	
+				
+				$this->db->select('b.kode_unik');
+				$this->db->from($this->prefix."item_kode_unik_log as a");
+				$this->db->join($this->prefix."item_kode_unik as b","b.id = a.kode_unik","LEFT");
+				$this->db->where("b.kode_unik IN ('".$all_unik_kode_sql."') AND is_deleted = 0 AND is_active = 1");
+				$this->db->group_by("b.kode_unik");
+				$get_cek = $this->db->get();
+				if($get_cek->num_rows() > 0){
+					$r = array('success' => false, 'info' => $get_cek->num_rows().' Unik Kode (SN/IMEI) sudah digunakan transaksi<br/>Silahkan Gunakan Retur Pembelian'); 
+					die(json_encode($r));
+				}
+				
+				return true;				
+			}
+			
+			$this->db->select('id, kode_unik');
+			$this->db->from($this->prefix."item_kode_unik");
+			$this->db->where("kode_unik IN ('".$all_unik_kode_sql."') AND is_deleted = 0 AND is_active = 1");
+			$get_cek = $this->db->get();
+			if($get_cek->num_rows() > 0){
+				
+				$i = 0;
+				$all_imei = '';
+				foreach($get_cek->result() as $dt){
+					$i++;
+					if($i < 10){
+						
+						if($all_imei == ''){
+							$all_imei = $dt->kode_unik;
+						}else{
+							$all_imei .= ', '.$dt->kode_unik;
+						}
+						
+						break;
+					}
+				}
+				
+				$r = array('success' => false, 'info' => $get_cek->num_rows().' Unik Kode (SN/IMEI) sudah ada, Cek SN/IMEI berikut<br/>'.$all_imei); 
+				die(json_encode($r));
+			}
+			
+			
+		}
 	}
 	
 	public function get_total_price($receive_id){

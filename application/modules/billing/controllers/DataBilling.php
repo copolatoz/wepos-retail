@@ -136,7 +136,7 @@ class DataBilling extends MY_Controller {
 			$this->db->from($this->prefix.'open_close_shift');
 			$this->db->where("user_shift",$shift_billing);
 			$this->db->where("(tanggal_shift = '".$date_from."' OR (tipe_shift = 'close' AND tanggal_shift = '".$qdate_from_plus1."' 
-				AND created <= '".$qdate_from_plus1." 06:00:00'))");
+				AND created <= '".$qdate_from_plus1." 23:59:59'))");
 			$get_shift = $this->db->get();
 			
 			if($get_shift->num_rows() > 0){
@@ -164,11 +164,11 @@ class DataBilling extends MY_Controller {
 					//FROM
 					if(empty($data_shift[$shift_billing]['jam_from'])){
 						if($shift_billing == 1){
-							$data_shift[$shift_billing]['jam_from'] = '07:00'; //default
+							$data_shift[$shift_billing]['jam_from'] = '00:00'; //default
 						}
 						
 						if($shift_billing == 2){
-							$data_shift[$shift_billing]['jam_from'] = '07:00:00'; //default
+							$data_shift[$shift_billing]['jam_from'] = '00:00:00'; //default
 							if(!empty($data_shift[1]['jam_till'])){
 								//take from shift 1
 								$data_shift[$shift_billing]['jam_from'] = $data_shift[1]['jam_till'].':59';
@@ -181,7 +181,7 @@ class DataBilling extends MY_Controller {
 					//TILL
 					if(empty($data_shift[$shift_billing]['jam_till'])){
 						if($shift_billing == 1){
-							$data_shift[$shift_billing]['jam_till'] = '06:00:00'; //default
+							$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
 							if(!empty($data_shift[2]['jam_from'])){
 								//take from shift 2
 								$data_shift[$shift_billing]['jam_till'] = $data_shift[1]['jam_from'].':00';
@@ -189,7 +189,7 @@ class DataBilling extends MY_Controller {
 						}
 						
 						if($shift_billing == 2){
-							$data_shift[$shift_billing]['jam_till'] = '06:00:00'; //default
+							$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
 						}
 						
 					}else{
@@ -221,9 +221,9 @@ class DataBilling extends MY_Controller {
 			}else{
 			
 				$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
-				$params['where'][] = "(a.payment_date >= '".$date_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+				$params['where'][] = "(a.payment_date >= '".$date_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 				
-				/*$params['where'][] = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$date_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '07:00:01' AND '24:00:00')";*/
+				/*$params['where'][] = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$date_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:00' AND '24:00:00')";*/
 			}
 		}
 		
@@ -296,8 +296,8 @@ class DataBilling extends MY_Controller {
 				$qdate_till_max = date("Y-m-d",strtotime($qdate_till)+ONE_DAY_UNIX);
 				
 				if(!empty($use_payment_date)){
-					//07:00:00
-					$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+					//00:00:00
+					$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 				}else{
 				
 					//exception
@@ -315,9 +315,9 @@ class DataBilling extends MY_Controller {
 					}
 				
 					if($billing_status == 'paid'){
-						$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+						$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 					}else{
-						$params['where'][] = "(a.updated >= '".$qdate_from." 00:00:01' AND a.updated <= '".$qdate_till_max." 06:00:00')";
+						$params['where'][] = "(a.updated >= '".$qdate_from." 00:00:00' AND a.updated <= '".$qdate_till_max." 23:59:59')";
 					}
 					
 					
@@ -654,7 +654,7 @@ class DataBilling extends MY_Controller {
 								a.buyget_item, a.free_item, a.package_item, a.ref_order_id, a.use_stok_kode_unik, a.data_stok_kode_unik, a.product_price_real,
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -719,10 +719,11 @@ class DataBilling extends MY_Controller {
 				$s['product_price_show'] = 'Rp '.priceFormat($s['product_price']);		
 				$s['order_total_show'] = 'Rp '.priceFormat($s['order_total']);		
 				
-				if(!empty($s['item_code'])){
-					$s['product_name'] = $s['item_code'].'<br/>'.$s['product_name'];
+				if(empty($s['product_code'])){
+					$s['product_code'] = $s['item_code'];
 				}
-				$s['product_detail_info'] = $s['product_name'];
+				
+				$s['product_detail_info'] = $s['product_code'].'<br/>'.$s['product_name'];
 				
 				$additional_text = '';
 				if(!empty($s['product_chinese_name']) AND $s['product_chinese_name'] != '-'){
@@ -1027,7 +1028,7 @@ class DataBilling extends MY_Controller {
 				$mktime_dari = strtotime($date_from);
 				$mktime_sampai = strtotime($date_till);
 							
-				$qdate_from = date("Y-m-d 07:00:00",strtotime($date_from));
+				$qdate_from = date("Y-m-d 00:00:00",strtotime($date_from));
 				$qdate_till = date("Y-m-d 23:59:59",strtotime($date_till));
 				$qdate_from_plus1 = date("Y-m-d",strtotime($qdate_till)+ONE_DAY_UNIX);
 				
@@ -1244,7 +1245,7 @@ class DataBilling extends MY_Controller {
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil, 
 								a.buyget_item, a.free_item, a.ref_order_id,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -1294,7 +1295,11 @@ class DataBilling extends MY_Controller {
 				$s['product_price_show'] = 'Rp '.priceFormat($s['product_price']);		
 				$s['order_total_show'] = 'Rp '.priceFormat($s['order_total']);		
 				
-				$s['product_detail_info'] = $s['product_name'];
+				if(empty($s['product_code'])){
+					$s['product_code'] = $s['item_code'];
+				}
+				
+				$s['product_detail_info'] = $s['product_code'].'<br/>'.$s['product_name'];
 				
 				$additional_text = '';
 				if(!empty($s['product_chinese_name']) AND $s['product_chinese_name'] != '-'){
@@ -1454,7 +1459,7 @@ class DataBilling extends MY_Controller {
 								a.buyget_item, a.free_item, a.ref_order_id, a.use_stok_kode_unik, a.data_stok_kode_unik,
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -1587,7 +1592,11 @@ class DataBilling extends MY_Controller {
 				$s['product_price_show'] = 'Rp '.priceFormat($s['product_price']);		
 				$s['order_total_show'] = 'Rp '.priceFormat($s['order_total']);		
 				
-				$s['product_detail_info'] = $s['product_name'];
+				if(empty($s['product_code'])){
+					$s['product_code'] = $s['item_code'];
+				}
+				
+				$s['product_detail_info'] = $s['product_code'].'<br/>'.$s['product_name'];
 				
 				$additional_text = '';
 				if(!empty($s['product_chinese_name']) AND $s['product_chinese_name'] != '-'){
@@ -1912,7 +1921,7 @@ class DataBilling extends MY_Controller {
 								a.buyget_item, a.free_item, a.ref_order_id, a.use_stok_kode_unik, a.data_stok_kode_unik,
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -2009,7 +2018,11 @@ class DataBilling extends MY_Controller {
 				$s['product_price_show'] = 'Rp '.priceFormat($s['product_price']);		
 				$s['order_total_show'] = 'Rp '.priceFormat($s['order_total']);		
 				
-				$s['product_detail_info'] = $s['product_name'];
+				if(empty($s['product_code'])){
+					$s['product_code'] = $s['item_code'];
+				}
+				
+				$s['product_detail_info'] = $s['product_code'].'<br/>'.$s['product_name'];
 				
 				$additional_text = '';
 				if(!empty($s['product_chinese_name']) AND $s['product_chinese_name'] != '-'){
@@ -2334,7 +2347,7 @@ class DataBilling extends MY_Controller {
 		$params = array(
 			'fields'		=> "a.*, 
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, c.product_category_name, d.varian_name, e.item_code",
+								b.category_id, b.product_group, c.product_category_name, d.varian_name, e.item_code, b.product_code",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -2385,7 +2398,11 @@ class DataBilling extends MY_Controller {
 				$s['product_price_show'] = 'Rp '.priceFormat($s['product_price']);		
 				$s['order_total_show'] = 'Rp '.priceFormat($s['order_total']);		
 				
-				$s['product_detail_info'] = $s['product_name'];
+				if(empty($s['product_code'])){
+					$s['product_code'] = $s['item_code'];
+				}
+				
+				$s['product_detail_info'] = $s['product_code'].'<br/>'.$s['product_name'];
 				
 				$additional_text = '';
 				if(!empty($s['product_chinese_name']) AND $s['product_chinese_name'] != '-'){

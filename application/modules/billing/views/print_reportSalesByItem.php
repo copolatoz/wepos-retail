@@ -104,14 +104,14 @@
 						$det['product_name'] = '#'.$det['product_id'].' deleted';
 					}
 						
-					if(empty($det['item_code'])){
-						$det['item_code'] = 'N/A';
+					if(empty($det['product_code'])){
+						$det['product_code'] = 'N/A';
 					}
 					
 					?>
 					<tr class="tbl-data">
 						<td class="first xcenter"><?php echo $no; ?></td>
-						<td class="xleft"><?php echo $det['item_code']; ?></td>
+						<td class="xleft"><?php echo $det['product_code']; ?></td>
 						<td class="xleft"><?php echo $det['product_name']; ?></td>
 						<td class="xcenter"><?php echo $det['total_qty']; ?></td>
 						<td class="xright"><?php echo $det['total_billing_show']; ?></td>

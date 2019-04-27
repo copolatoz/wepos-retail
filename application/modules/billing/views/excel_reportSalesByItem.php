@@ -111,14 +111,14 @@ if(!empty($payment_data)){
 					$det['product_name'] = '#'.$det['product_id'].' deleted';
 				}
 						
-				if(empty($det['item_code'])){
-					$det['item_code'] = 'N/A';
+				if(empty($det['product_code'])){
+					$det['product_code'] = 'N/A';
 				}
 				
 				?>
 				<tr>
 					<td class="tbl_data_td_first_xcenter"><?php echo $no; ?></td>
-					<td class="tbl_data_td"><?php echo $det['item_code']; ?></td>
+					<td class="tbl_data_td"><?php echo $det['product_code']; ?></td>
 					<td class="tbl_data_td"><?php echo $det['product_name']; ?></td>
 					<td class="tbl_data_td_xcenter"><?php echo $det['total_qty']; ?></td>
 					<td class="tbl_data_td_xright">Rp. <?php echo $det['total_billing_show']; ?></td>

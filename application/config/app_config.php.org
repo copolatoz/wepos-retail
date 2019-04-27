@@ -2,13 +2,14 @@
 
 /*General Info*/
 $config['program_name']			=	'WePOS.Retail';
-$config['program_version']		=	'3.42.19';
-$config['program_release']		=	'2018';
+$config['program_version']		=	'3.42.20';
+$config['program_release']		=	'2019';
 $config['program_name_short'] 	=	'WePOS.Retail';
 $config['copyright']			=	$config['program_name_short'].' v'.$config['program_version'].' &copy copyright '.$config['program_release'];
 $config['client_name']			=	'WePOS.Client';
 $config['program_author']		=	'WePOS.Dev';
 $config['website']				=	'https://wepos.id';
+$config['cloud_access']			=	TRUE;
 
 /*Common config*/
 $config['db_prefix']	= 'apps_';
@@ -17,4 +18,3 @@ $config['db_prefix3']	= 'acc_';
 
 $config['timezone_default']	= 'Asia/Jakarta';
 $config['wepos_crt_file']	= 'cacert.pem';
-
