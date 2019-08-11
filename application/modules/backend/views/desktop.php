@@ -14,7 +14,7 @@
 	
 	<div id="loading-mask"></div>
 	<div id="loading">
-		<img src="<?php echo base_url(); ?>assets/desktop/images/loader.gif" width="86" height="86" alt="Loading..." style="margin-bottom:25px;"/>
+		<img src="<?php echo base_url(); ?>assets/desktop/images/loader.gif" width="160" height="20" alt="Loading..." style="margin-bottom:25px;"/>
 		<div id="msg">Please wait: Preparing Load Files...</div>
 	</div>
 	

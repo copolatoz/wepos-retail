@@ -62,8 +62,8 @@ class WeposNotify extends MY_Controller {
 		$this->usagewaste_detail = $this->prefix_pos.'usagewaste_detail';
 		$this->stock = $this->prefix_pos.'stock';
 		$this->notify_log = $this->prefix_pos.'notify_log';
-		$this->reservation = $this->prefix_pos.'reservation';
-		$this->reservation_detail = $this->prefix_pos.'reservation_detail';
+		$this->salesorder = $this->prefix_pos.'salesorder';
+		$this->salesorder_detail = $this->prefix_pos.'salesorder_detail';
 		
 		
 		$session_client_id = $this->session->userdata('client_id');	
@@ -143,60 +143,60 @@ class WeposNotify extends MY_Controller {
 		}
 		
 		
-		//GET reservation
-		$all_reservation = array();
-		$all_reservation_no = array();
-		$all_reservation_id = array();
-		$all_reservation_total = array();
+		//GET salesorder
+		$all_salesorder = array();
+		$all_salesorder_no = array();
+		$all_salesorder_id = array();
+		$all_salesorder_total = array();
 		
-		if ($this->db->table_exists($this->reservation))
+		if ($this->db->table_exists($this->salesorder))
 		{
-			$this->db->from($this->reservation);
-			$this->db->where("reservation_status = 'done'");
+			$this->db->from($this->salesorder);
+			$this->db->where("salesorder_status = 'done'");
 			$get_so = $this->db->get();
 			if($get_so->num_rows() > 0){
 				foreach($get_so->result_array() as $dt){
-					$all_ref[] = $dt['reservation_number'];
-					$all_reservation[] = $dt['reservation_number'];
-					$all_reservation_id[] = $dt['id'];
-					$all_reservation_no[$dt['id']] = $dt['reservation_number'];
-					$all_reservation_total[$dt['id']] = ($dt['reservation_sub_total'] - $dt['reservation_discount']);
+					$all_ref[] = $dt['salesorder_number'];
+					$all_salesorder[] = $dt['salesorder_number'];
+					$all_salesorder_id[] = $dt['id'];
+					$all_salesorder_no[$dt['id']] = $dt['salesorder_number'];
+					$all_salesorder_total[$dt['id']] = ($dt['salesorder_sub_total'] - $dt['salesorder_discount']);
 					
 					
 				}
-				//echo '<br/>---FOUND reservation: '.count($all_reservation).'---';
+				//echo '<br/>---FOUND salesorder: '.count($all_salesorder).'---';
 			}
 		}
 
 		
 		
-		$all_reservation_detail = array();
-		$all_reservation_no_detail = array();
-		$all_reservation_total_detail = array();
+		$all_salesorder_detail = array();
+		$all_salesorder_no_detail = array();
+		$all_salesorder_total_detail = array();
 		
-		if ($this->db->table_exists($this->reservation_detail))
+		if ($this->db->table_exists($this->salesorder_detail))
 		{
-			if(!empty($all_reservation_id)){
-				$all_reservation_id_sql = implode(",", $all_reservation_id);
-				$this->db->from($this->reservation_detail);
-				$this->db->where("reservation_id IN (".$all_reservation_id_sql.")");
+			if(!empty($all_salesorder_id)){
+				$all_salesorder_id_sql = implode(",", $all_salesorder_id);
+				$this->db->from($this->salesorder_detail);
+				$this->db->where("salesorder_id IN (".$all_salesorder_id_sql.")");
 				$get_resd = $this->db->get();
 				if($get_resd->num_rows() > 0){
 					foreach($get_resd->result_array() as $dt){
 						
 						if($dt['resd_qty'] > 0){
-							$all_reservation_detail[$dt['id']] = $dt['item_id'];
-							$all_reservation_no_detail[$dt['id']] = $all_reservation_no[$dt['reservation_id']];
+							$all_salesorder_detail[$dt['id']] = $dt['item_id'];
+							$all_salesorder_no_detail[$dt['id']] = $all_salesorder_no[$dt['salesorder_id']];
 							
-							if(empty($all_reservation_total_detail[$dt['reservation_id']])){
-								$all_reservation_total_detail[$dt['reservation_id']] = 0;
+							if(empty($all_salesorder_total_detail[$dt['salesorder_id']])){
+								$all_salesorder_total_detail[$dt['salesorder_id']] = 0;
 							}
 							
-							$all_reservation_total_detail[$dt['reservation_id']] += ($dt['resd_total'] - $dt['resd_potongan']);
+							$all_salesorder_total_detail[$dt['salesorder_id']] += ($dt['resd_total'] - $dt['resd_potongan']);
 							
 						}
 					}
-					//echo '<br/>---FOUND reservation DETAIL: '.count($all_reservation_detail).'---';
+					//echo '<br/>---FOUND salesorder DETAIL: '.count($all_salesorder_detail).'---';
 				}
 			}
 		}
@@ -204,8 +204,8 @@ class WeposNotify extends MY_Controller {
 		//check on stock
 		$detail_receive_stok = array();
 		$all_receive_stok = array();
-		$detail_reservation_stok = array();
-		$all_reservation_stok = array();
+		$detail_salesorder_stok = array();
+		$all_salesorder_stok = array();
 		if(!empty($all_ref)){
 			$all_ref_sql = implode("','", $all_ref);
 			$this->db->from($this->stock);
@@ -225,12 +225,12 @@ class WeposNotify extends MY_Controller {
 					}
 					
 					if($dt['trx_note'] == 'Sales Order'){
-						if(!in_array($dt['trx_ref_data'], $all_reservation_stok)){
-							$all_reservation_stok[] = $dt['trx_ref_data'];
+						if(!in_array($dt['trx_ref_data'], $all_salesorder_stok)){
+							$all_salesorder_stok[] = $dt['trx_ref_data'];
 						}
 						
-						if(empty($detail_reservation_stok[$dt['trx_ref_det_id']])){
-							$detail_reservation_stok[$dt['trx_ref_det_id']] = $dt['item_id'];
+						if(empty($detail_salesorder_stok[$dt['trx_ref_det_id']])){
+							$detail_salesorder_stok[$dt['trx_ref_det_id']] = $dt['item_id'];
 						}
 					}
 					
@@ -305,11 +305,11 @@ class WeposNotify extends MY_Controller {
 		
 		//NOTIFY SO ----------------------------------------------------------
 		$notify_text_so = '';
-		if(!empty($all_reservation)){
+		if(!empty($all_salesorder)){
 			
 			$no_err = 0;
-			foreach($all_reservation as $dt){
-				if(!in_array($dt, $all_reservation_stok)){
+			foreach($all_salesorder as $dt){
+				if(!in_array($dt, $all_salesorder_stok)){
 					$no_err++;
 					
 					if($no_err == 1){
@@ -327,19 +327,19 @@ class WeposNotify extends MY_Controller {
 		}
 		
 		
-		if(!empty($all_reservation_detail)){
+		if(!empty($all_salesorder_detail)){
 			
 			$no_err = 0;
-			foreach($all_reservation_detail as $key => $val){
+			foreach($all_salesorder_detail as $key => $val){
 				
-				if(!empty($detail_reservation_stok[$key])){
+				if(!empty($detail_salesorder_stok[$key])){
 					
-					if($detail_reservation_stok[$key] != $val){
+					if($detail_salesorder_stok[$key] != $val){
 						$no_err++;
 						if($no_err == 1){
 							$notify_text_so .= '<br/><br/>---CEK SO DETAIL ITEM => STOK ITEM---';
 						}
-						$notify_text_so .= '<br/>ITEM DETAIL: '.$all_reservation_no_detail[$key].' / #'.$key.' --> TIDAK SAMA DENGAN DI STOK!';
+						$notify_text_so .= '<br/>ITEM DETAIL: '.$all_salesorder_no_detail[$key].' / #'.$key.' --> TIDAK SAMA DENGAN DI STOK!';
 						
 					}
 					
@@ -348,7 +348,7 @@ class WeposNotify extends MY_Controller {
 					if($no_err == 1){
 						$notify_text_so .= '<br/><br/>---CEK SO DETAIL ITEM => STOK ITEM---';
 					}
-					$notify_text_so .= '<br/>DETAIL: '.$all_reservation_no_detail[$key].' / #'.$key.' --> TIDAK ADA DI STOK!';
+					$notify_text_so .= '<br/>DETAIL: '.$all_salesorder_no_detail[$key].' / #'.$key.' --> TIDAK ADA DI STOK!';
 					
 				}
 				
@@ -361,13 +361,13 @@ class WeposNotify extends MY_Controller {
 			}
 		}
 		
-		if(!empty($all_reservation_total)){
+		if(!empty($all_salesorder_total)){
 			$notify_text_so .= '<br/>---CEK SO TOTAL => DETAIL---';
-			foreach($all_reservation_total as $reservation_id => $total){
+			foreach($all_salesorder_total as $salesorder_id => $total){
 				
-				if(!empty($all_reservation_total_detail[$reservation_id])){
-					if($all_reservation_total_detail[$reservation_id] != $total){
-						$notify_text_so .= '<br/>#'.$all_reservation_no[$reservation_id].' -> '.priceFormat($total).' != '.priceFormat($all_reservation_total_detail[$reservation_id]);
+				if(!empty($all_salesorder_total_detail[$salesorder_id])){
+					if($all_salesorder_total_detail[$salesorder_id] != $total){
+						$notify_text_so .= '<br/>#'.$all_salesorder_no[$salesorder_id].' -> '.priceFormat($total).' != '.priceFormat($all_salesorder_total_detail[$salesorder_id]);
 					}
 				}
 				

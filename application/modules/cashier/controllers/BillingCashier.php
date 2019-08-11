@@ -779,6 +779,86 @@ class BillingCashier extends MY_Controller {
 		$billing_date = date('ymd');
 		$billing_time = date('G');
 		$datenowstr = strtotime(date("d-m-Y H:i:s"));
+		$datenowstr0 = strtotime(date("d-m-Y 00:00:00"));
+		
+		$get_opt_var = array('jam_operasional_from','jam_operasional_to','jam_operasional_extra');
+		$get_opt = get_option_value($get_opt_var);
+		
+		$jam_operasional_from = 7;
+		$jam_operasional_from_Hi = '07:00';
+		if(!empty($get_opt['jam_operasional_from'])){
+			$jm_opr_mktime = strtotime(date("d-m-Y")." ".$get_opt['jam_operasional_from']);
+			$jam_operasional_from = date('G',$jm_opr_mktime);
+			$jam_operasional_from_Hi = date('H:i',$jm_opr_mktime);
+		}
+		
+		$jam_operasional_to = 23;
+		$jam_operasional_to_Hi = '23:00';
+		if(!empty($get_opt['jam_operasional_to'])){
+			if($get_opt['jam_operasional_to'] == '24:00'){
+				$get_opt['jam_operasional_to'] = '23:59:59';
+			}
+			$jm_opr_mktime = strtotime(date("d-m-Y")." ".$get_opt['jam_operasional_to']);
+			$jam_operasional_to = date('G',$jm_opr_mktime);
+			$jam_operasional_to_Hi = date('H:i',$jm_opr_mktime);
+		}
+		
+		$jam_operasional_extra = 0;
+		if(!empty($get_opt['jam_operasional_extra'])){
+			$jam_operasional_extra = $get_opt['jam_operasional_extra'];
+		}
+		
+		if($billing_time < $jam_operasional_from){
+			//extra / early??
+			
+			//check extra
+			$datenowstrmin1 = $datenowstr0-ONE_DAY_UNIX;
+			$datenowstr_oprfrom = strtotime(date("d-m-Y", $datenowstrmin1)." ".$jam_operasional_from_Hi.":00");
+			$datenowstr_oprto_org = strtotime(date("d-m-Y", $datenowstrmin1)." ".$jam_operasional_to_Hi.":00");
+			$datenowstr_oprto = strtotime(date("d-m-Y", $datenowstrmin1)." ".$jam_operasional_to_Hi.":00");
+			//add extra
+			if(!empty($jam_operasional_extra)){
+				$datenowstr_oprto += ($jam_operasional_extra*3600);
+			}
+			
+			if($datenowstr < $datenowstr_oprto){
+				$billing_date = date('ymd', $datenowstrmin1);
+				$datenowstr = $datenowstrmin1;
+			}else{
+				
+				if(!empty($jam_operasional_extra)){
+					$r = array('success' => false, 'info' => 'Jam Operasional: '.date("d-m-Y H:i",$datenowstr_oprfrom).' s/d '.date("H:i",$datenowstr_oprto_org).'<br/>Jam Operasional Extra = '.date("d-m-Y H:i",$datenowstr_oprto));
+				}else{
+					$r = array('success' => false, 'info' => 'Jam Operasional: '.date("d-m-Y H:i",$datenowstr_oprfrom).' s/d '.date("H:i",$datenowstr_oprto));
+				}
+				echo json_encode($r);
+				die();
+			}
+			
+		}else{
+			
+			$datenowstr_oprfrom = strtotime(date("d-m-Y", $datenowstr0)." ".$jam_operasional_from_Hi.":00");
+			$datenowstr_oprto_org = strtotime(date("d-m-Y", $datenowstr0)." ".$jam_operasional_to_Hi.":00");
+			$datenowstr_oprto = strtotime(date("d-m-Y", $datenowstr0)." ".$jam_operasional_to_Hi.":00");
+			//add extra
+			if(!empty($jam_operasional_extra)){
+				$datenowstr_oprto += ($jam_operasional_extra*3600);
+			}
+			
+			if($datenowstr < $datenowstr_oprto){
+				$billing_date = date('ymd', $datenowstr0);
+				$datenowstr = $datenowstr0;
+			}else{
+				if(!empty($jam_operasional_extra)){
+					$r = array('success' => false, 'info' => 'Jam Operasional: '.date("d-m-Y H:i",$datenowstr_oprfrom).' s/d '.date("H:i",$datenowstr_oprto_org).'<br/>Jam Operasional Extra = '.date("d-m-Y H:i",$datenowstr_oprto));
+				}else{
+					$r = array('success' => false, 'info' => 'Jam Operasional: '.date("d-m-Y H:i",$datenowstr_oprfrom).' s/d '.date("H:i",$datenowstr_oprto));
+				}
+				echo json_encode($r);
+				die();
+			}
+			
+		}
 		
 		//if($billing_time < 7){
 		//	$datenowstr = strtotime(date("d-m-Y H:i:s"))-ONE_DAY_UNIX;
@@ -794,9 +874,10 @@ class BillingCashier extends MY_Controller {
 			$data_billing = $get_last->row();
 			$billing_no = $data_billing->billing_no;
 			$billing_date = date('ymd', $datenowstr);
+			
 			//CHECK IF VALID
 			if(date('ymd', $datenowstr) != substr($billing_no, 0, 6)){
-				if(strtotime(date('Y-m-d')) <= strtotime(substr($billing_no, 0, 2)."-".substr($billing_no, 2, 2)."-".substr($billing_no, 4, 2))){
+				if(strtotime(date('d-m-Y')) <= strtotime(substr($billing_no, 0, 2)."-".substr($billing_no, 2, 2)."-".substr($billing_no, 4, 2))){
 					//INCREMENT IF OLD DATE
 					$billing_date = substr($billing_no, 0, 6);
 					$billing_no = str_replace($billing_date,"",$billing_no);	
@@ -4437,6 +4518,7 @@ class BillingCashier extends MY_Controller {
 		
 		$printer_tipe = $this->input->get_post('printer_tipe', true);	
 		$do_print = $this->input->get_post('do_print', true);	
+		$new_no = $this->input->get_post('new_no', true);	
 		
 		if(!empty($initialize_printing)){
 			die();
@@ -4693,7 +4775,7 @@ class BillingCashier extends MY_Controller {
 
 				if($printer_pin_cashierReceipt == 32){
 					$max_text -= 6;
-					$max_number_1 = 8;
+					$max_number_1 = 7;
 					$max_number_2 = 8;
 					$max_number_3 = 13;
 				}
@@ -4716,7 +4798,7 @@ class BillingCashier extends MY_Controller {
 					$max_number_3 = 13;
 				}
 				if($printer_pin_cashierReceipt == 48){
-					$max_text += 4;
+					$max_text += 3;
 					$max_number_1 = 10;
 					$max_number_2 = 12;
 					$max_number_3 = 13;
@@ -5367,6 +5449,10 @@ class BillingCashier extends MY_Controller {
 				$table_no_receipt = $table_no_title.$billingData->table_no;
 				$table_no_receipt = printer_command_align_right($table_no_receipt, 15);
 				
+				if(!empty($new_no)){
+					$billingData->billing_no = $new_no;
+				}
+				
 				//$billingData->billing_no
 				$billing_no_receipt = $billingData->billing_no;
 				$billing_no_title = 'NO:';
@@ -5441,6 +5527,13 @@ class BillingCashier extends MY_Controller {
 					"{guest}"=> $billingData->total_guest,
 					"{compliment}"=> $compliment_total_show
 				);
+				
+				//DATE PAID
+				if($billingData->billing_status == 'paid'){
+					$print_attr['{date}'] = date("d/m/Y",strtotime($billingData->payment_date));
+					$print_attr['{date_time}'] = date("d/m/Y H:i",strtotime($billingData->payment_date));
+					$print_attr['{user}'] = $billingData->updatedby;
+				}
 				
 				if(!empty($single_rate_txt)){
 					$print_attr["{billing_no}"] = $billing_no_receipt.$single_rate_txt;
@@ -5559,7 +5652,8 @@ class BillingCashier extends MY_Controller {
 					if(!empty($bill_preview)){
 						printing_process($data_printer[$printer_id_cashierReceipt], $print_content_cashierReceipt,'noprint');
 					}else{
-						printing_process($data_printer[$printer_id_cashierReceipt], $print_content_cashierReceipt, 'print', 1);
+						printing_process($data_printer[$printer_id_cashierReceipt], $print_content_cashierReceipt, 'print');
+						//printing_process($data_printer[$printer_id_cashierReceipt], $print_content_cashierReceipt, 'print', 1);
 					}
 					
 					
@@ -9399,7 +9493,7 @@ class BillingCashier extends MY_Controller {
 			$max_number_3 = 13;
 		}
 		if($printer_pin_cashierReceipt == 48){
-			$max_text += 4;
+			$max_text += 3;
 			$max_number_1 = 10;
 			$max_number_2 = 12;
 			$max_number_3 = 13;

@@ -449,8 +449,8 @@ class BackupTrx extends MY_Controller {
 		if($wepos_tipe == 'cafe'){
 			unset($total_data_lokal['salesorder']);
 			unset($total_data_lokal['salesorder_detail']);
-			$total_data_lokal['reservation'] = 0;
-			$total_data_lokal['reservation_detail'] = 0;
+			$total_data_lokal['salesorder'] = 0;
+			$total_data_lokal['salesorder_detail'] = 0;
 		}
 		
 		$last_id_lokal = array(
@@ -503,8 +503,8 @@ class BackupTrx extends MY_Controller {
 		if($wepos_tipe == 'cafe'){
 			unset($last_id_lokal['salesorder']);
 			unset($last_id_lokal['salesorder_detail']);
-			$last_id_lokal['reservation'] = 0;
-			$last_id_lokal['reservation_detail'] = 0;
+			$last_id_lokal['salesorder'] = 0;
+			$last_id_lokal['salesorder_detail'] = 0;
 		}
 		
 		$today_mk = strtotime(date("d-m-Y 06:00:00"));
@@ -555,19 +555,19 @@ class BackupTrx extends MY_Controller {
 		if($wepos_tipe == 'cafe'){
 			
 			//RESERVATION
-			$get_store_reservation = $this->db->query("SELECT id FROM ".$this->prefix_pos."reservation ORDER BY id DESC");
-			if($get_store_reservation->num_rows() > 0){
-				$dt_store_reservation = $get_store_reservation->row();
-				$last_id_lokal["reservation"] = $dt_store_reservation->id;
-				$total_data_lokal["reservation"] = $get_store_reservation->num_rows();
+			$get_store_salesorder = $this->db->query("SELECT id FROM ".$this->prefix_pos."salesorder ORDER BY id DESC");
+			if($get_store_salesorder->num_rows() > 0){
+				$dt_store_salesorder = $get_store_salesorder->row();
+				$last_id_lokal["salesorder"] = $dt_store_salesorder->id;
+				$total_data_lokal["salesorder"] = $get_store_salesorder->num_rows();
 			}
 			
 			//RESERVATION - DETAIL
-			$get_store_reservation_detail = $this->db->query("SELECT id FROM ".$this->prefix_pos."reservation_detail ORDER BY id DESC");
-			if($get_store_reservation_detail->num_rows() > 0){
-				$dt_store_reservation_detail = $get_store_reservation_detail->row();
-				$last_id_lokal["reservation_detail"] = $dt_store_reservation_detail->id;
-				$total_data_lokal["reservation_detail"] = $get_store_reservation_detail->num_rows();
+			$get_store_salesorder_detail = $this->db->query("SELECT id FROM ".$this->prefix_pos."salesorder_detail ORDER BY id DESC");
+			if($get_store_salesorder_detail->num_rows() > 0){
+				$dt_store_salesorder_detail = $get_store_salesorder_detail->row();
+				$last_id_lokal["salesorder_detail"] = $dt_store_salesorder_detail->id;
+				$total_data_lokal["salesorder_detail"] = $get_store_salesorder_detail->num_rows();
 			}
 			
 		}else{
@@ -1096,8 +1096,8 @@ class BackupTrx extends MY_Controller {
 		);
 		
 		if($wepos_tipe == 'cafe'){
-			$backup_data_allowed[14] = 'reservation';
-			$backup_data_allowed[15] = 'reservation_detail';
+			$backup_data_allowed[14] = 'salesorder';
+			$backup_data_allowed[15] = 'salesorder_detail';
 		}
 		
 		$backup_data_text = array(
@@ -1150,8 +1150,8 @@ class BackupTrx extends MY_Controller {
 		if($wepos_tipe == 'cafe'){
 			unset($backup_data_allowed['salesorder']);
 			unset($backup_data_allowed['salesorder_detail']);
-			$backup_data_allowed['reservation'] = 'Reservation';
-			$backup_data_allowed['reservation'] = 'Reservation Detail';
+			$backup_data_allowed['salesorder'] = 'Reservation';
+			$backup_data_allowed['salesorder'] = 'Reservation Detail';
 		}
 		
 		
@@ -1637,40 +1637,40 @@ class BackupTrx extends MY_Controller {
 				break;
 			
 			//Reservation
-			case 'reservation':
+			case 'salesorder':
 				$backup_text = 'Billing/Cashier';
 				
 				//Reservation ON STORE
-				$last_id_reservation_store = 0;
+				$last_id_salesorder_store = 0;
 				$total_data_store = 0;
-				$get_all_store_reservation = $this->db->query("SELECT id FROM ".$this->prefix_pos."reservation ORDER BY id DESC");
-				if($get_all_store_reservation->num_rows() > 0){
-					$dt_all_reservation_store = $get_all_store_reservation->row();
-					$last_id_reservation_store = $dt_all_reservation_store->id;
-					$total_data_store = $get_all_store_reservation->num_rows();
+				$get_all_store_salesorder = $this->db->query("SELECT id FROM ".$this->prefix_pos."salesorder ORDER BY id DESC");
+				if($get_all_store_salesorder->num_rows() > 0){
+					$dt_all_salesorder_store = $get_all_store_salesorder->row();
+					$last_id_salesorder_store = $dt_all_salesorder_store->id;
+					$total_data_store = $get_all_store_salesorder->num_rows();
 				}
 				
 				$last_id_store = 0;
 				$total_data_store_detail = 0;
 				$last_id_store_detail = 0;
 				
-				if($last_id_reservation_store == $last_id_on_backup){
+				if($last_id_salesorder_store == $last_id_on_backup){
 					$r = array('success' => true, 'info' => 'Backup Data: <b>'.$backup_text.'</b> Updated!', 'has_next' => 0);
 					die(json_encode($r));
 				}
 				
 				//Reservation ON STORE id > $last_id_on_backup
-				$reservation_store = array();
-				$all_reservation = array();
-				$get_store_reservation = $this->db->query("SELECT * FROM ".$this->prefix_pos."reservation WHERE id > ".$last_id_on_backup." ORDER BY id ASC LIMIT ".$limit_backup_data);
-				if($get_store_reservation->num_rows() > 0){
+				$salesorder_store = array();
+				$all_salesorder = array();
+				$get_store_salesorder = $this->db->query("SELECT * FROM ".$this->prefix_pos."salesorder WHERE id > ".$last_id_on_backup." ORDER BY id ASC LIMIT ".$limit_backup_data);
+				if($get_store_salesorder->num_rows() > 0){
 					
-					foreach($get_store_reservation->result() as $dt){
+					foreach($get_store_salesorder->result() as $dt){
 						
-						$reservation_store[] = (array) $dt;
+						$salesorder_store[] = (array) $dt;
 						
-						if(!in_array($dt->id, $all_reservation)){
-							$all_reservation[] = $dt->id;
+						if(!in_array($dt->id, $all_salesorder)){
+							$all_salesorder[] = $dt->id;
 						}
 						
 						$last_id_store = $dt->id;
@@ -1678,57 +1678,57 @@ class BackupTrx extends MY_Controller {
 				}
 				
 				if(empty($last_id_store)){
-					$last_id_store = $last_id_reservation_store;
+					$last_id_store = $last_id_salesorder_store;
 				}
 				
 				//NEXT DATA
-				if($last_id_reservation_store > $last_id_store){
+				if($last_id_salesorder_store > $last_id_store){
 					$has_next = 1;
 				}
 				
-				$post_data['last_id_reservation_store'] = $last_id_reservation_store;
+				$post_data['last_id_salesorder_store'] = $last_id_salesorder_store;
 				$post_data['total_data_store'] = $total_data_store;
 				$post_data['last_id_store'] = $last_id_store;
-				$post_data['reservation_store'] = json_encode($reservation_store);
-				$post_data['all_reservation'] = json_encode($all_reservation);
+				$post_data['salesorder_store'] = json_encode($salesorder_store);
+				$post_data['all_salesorder'] = json_encode($all_salesorder);
 				
 				break;
 			
 			//Reservation
-			case 'reservation_detail':
+			case 'salesorder_detail':
 				$backup_text = 'Reservation Detail';
 				
 				//Reservation ON STORE
-				$last_id_reservation_detail_store = 0;
+				$last_id_salesorder_detail_store = 0;
 				$total_data_store = 0;
-				$get_all_store_reservation_detail = $this->db->query("SELECT id FROM ".$this->prefix_pos."reservation_detail ORDER BY id DESC");
-				if($get_all_store_reservation_detail->num_rows() > 0){
-					$dt_all_reservation_detail_store = $get_all_store_reservation_detail->row();
-					$last_id_reservation_detail_store = $dt_all_reservation_detail_store->id;
-					$total_data_store = $get_all_store_reservation_detail->num_rows();
+				$get_all_store_salesorder_detail = $this->db->query("SELECT id FROM ".$this->prefix_pos."salesorder_detail ORDER BY id DESC");
+				if($get_all_store_salesorder_detail->num_rows() > 0){
+					$dt_all_salesorder_detail_store = $get_all_store_salesorder_detail->row();
+					$last_id_salesorder_detail_store = $dt_all_salesorder_detail_store->id;
+					$total_data_store = $get_all_store_salesorder_detail->num_rows();
 				}
 				
 				$last_id_store = 0;
 				$total_data_store_detail = 0;
 				$last_id_store_detail = 0;
 				
-				if($last_id_reservation_detail_store == $last_id_on_backup){
+				if($last_id_salesorder_detail_store == $last_id_on_backup){
 					$r = array('success' => true, 'info' => 'Backup Data: <b>'.$backup_text.'</b> Updated!', 'has_next' => 0);
 					die(json_encode($r));
 				}
 				
 				//Reservation ON STORE id > $last_id_on_backup
-				$reservation_detail_store = array();
-				$all_reservation_detail = array();
-				$get_store_reservation_detail = $this->db->query("SELECT * FROM ".$this->prefix_pos."reservation_detail WHERE id > ".$last_id_on_backup." ORDER BY id ASC LIMIT ".$limit_backup_data);
-				if($get_store_reservation_detail->num_rows() > 0){
+				$salesorder_detail_store = array();
+				$all_salesorder_detail = array();
+				$get_store_salesorder_detail = $this->db->query("SELECT * FROM ".$this->prefix_pos."salesorder_detail WHERE id > ".$last_id_on_backup." ORDER BY id ASC LIMIT ".$limit_backup_data);
+				if($get_store_salesorder_detail->num_rows() > 0){
 					
-					foreach($get_store_reservation_detail->result() as $dt){
+					foreach($get_store_salesorder_detail->result() as $dt){
 						
-						$reservation_detail_store[] = (array) $dt;
+						$salesorder_detail_store[] = (array) $dt;
 						
-						if(!in_array($dt->id, $all_reservation_detail)){
-							$all_reservation_detail[] = $dt->id;
+						if(!in_array($dt->id, $all_salesorder_detail)){
+							$all_salesorder_detail[] = $dt->id;
 						}
 						
 						$last_id_store = $dt->id;
@@ -1736,19 +1736,19 @@ class BackupTrx extends MY_Controller {
 				}
 				
 				if(empty($last_id_store)){
-					$last_id_store = $last_id_reservation_detail_store;
+					$last_id_store = $last_id_salesorder_detail_store;
 				}
 				
 				//NEXT DATA
-				if($last_id_reservation_detail_store > $last_id_store){
+				if($last_id_salesorder_detail_store > $last_id_store){
 					$has_next = 1;
 				}
 				
-				$post_data['last_id_reservation_detail_store'] = $last_id_reservation_detail_store;
+				$post_data['last_id_salesorder_detail_store'] = $last_id_salesorder_detail_store;
 				$post_data['total_data_store'] = $total_data_store;
 				$post_data['last_id_store'] = $last_id_store;
-				$post_data['reservation_detail_store'] = json_encode($reservation_detail_store);
-				$post_data['all_reservation_detail'] = json_encode($all_reservation_detail);
+				$post_data['salesorder_detail_store'] = json_encode($salesorder_detail_store);
+				$post_data['all_salesorder_detail'] = json_encode($all_salesorder_detail);
 				
 				break;
 			

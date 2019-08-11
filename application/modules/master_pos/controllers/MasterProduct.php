@@ -1322,6 +1322,13 @@ class MasterProduct extends MY_Controller {
 		
 		$product_name = $this->input->post('product_name');
 		$product_sku = $this->input->post('product_sku');
+		$product_type = $this->input->post('product_type');
+
+		if($product_type == 'package'){
+			$product_prefix = 'PKT-';
+		}else{
+			$product_prefix = 'SKU-';
+		}
 		
 		$opt_value = array(
 			'product_code_format',
@@ -1347,7 +1354,7 @@ class MasterProduct extends MY_Controller {
 			$first_format = $get_exp[0];
 			
 			$this->db->from($this->table);
-			$this->db->where("product_code LIKE '".$first_format."%' AND product_name = '".$product_name."'");
+			$this->db->where("product_code LIKE '".$product_prefix.$first_format."%' AND product_name = '".$product_name."'");
 			$this->db->where("is_deleted = 0");
 			$this->db->order_by('product_no', 'DESC');
 			$this->db->order_by('product_code', 'DESC');
@@ -1366,7 +1373,7 @@ class MasterProduct extends MY_Controller {
 			}else{
 				
 				$this->db->from($this->table);
-				$this->db->where("product_code LIKE '".$first_format."%'");
+				$this->db->where("product_code LIKE '".$product_prefix.$first_format."%'");
 				$this->db->where("is_deleted = 0");
 				$this->db->order_by('product_no', 'DESC');
 				$this->db->order_by('product_code', 'DESC');
@@ -1578,6 +1585,7 @@ class MasterProduct extends MY_Controller {
 								*/
 								
 								$all_new_data[] = array(
+										'product_code'	=> 	$product_code,
 										'product_name'	=> 	$product_name,
 										'product_desc'	=>	$product_desc,
 										'product_price'	=>	$product_price,
@@ -1626,6 +1634,7 @@ class MasterProduct extends MY_Controller {
 										$all_new_id[] = $id;
 										$all_new_data_with_id[] = array(
 											'id'	=> 	$id,
+											'product_code'	=> 	$product_code,
 											'product_name'	=> 	$product_name,
 											'product_desc'	=>	$product_desc,
 											'product_price'	=>	$product_price,
@@ -1648,6 +1657,7 @@ class MasterProduct extends MY_Controller {
 										$all_update_id[] = $id;
 										$all_update_data[] = array(
 											'id'	=> 	$id,
+											'product_code'	=> 	$product_code,
 											'product_name'	=> 	$product_name,
 											'product_desc'	=>	$product_desc,
 											'product_price'	=>	$product_price,

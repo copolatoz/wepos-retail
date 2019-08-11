@@ -400,7 +400,7 @@ if( ! function_exists('replace_to_printer_command')){
 		
 		//48
 		if($tipe_pin == 48){
-			$string_to_hexa['[set_tab1]'] = "\x1b\x44\x04\x1a\x24";
+			$string_to_hexa['[set_tab1]'] = "\x1b\x44\x04\x19\x24";
 			$string_to_hexa['[set_tab2]'] = "\x1b\x44\x15\x23"; 
 			$string_to_hexa['[set_tab3]'] = "\x1b\x44\x01\x23";
 			$string_to_hexa['[set_tab1a]'] = "\x1b\x44\x04\x23";
@@ -1110,7 +1110,7 @@ if(!function_exists('printing_process')){
 		//CHAR PIN
 		$set_tab[32] = array(
 			'1' => array(
-						1, 5, 16, 23
+						1, 5, 18, 26
 					),
 			'2' => array(
 						1, 4, 18
@@ -1719,6 +1719,112 @@ if( ! function_exists('cek_server_backup')){
 			$r = array('success' => false, 'info' => 'Tidak dapat melakukan Transaksi, Aplikasi WePOS ini di set sebagai Server Backup!');
 			die(json_encode($r));
 		}
+    } 
+}
+
+
+if( ! function_exists('check_report_jam_operasional')){
+	function check_report_jam_operasional($get_opt = array(), $mktime_dari = 0, $mktime_sampai = 0) {
+		
+		if(!empty($get_opt)){
+		   if(empty($get_opt['jam_operasional_from']) OR empty($get_opt['jam_operasional_to'])){
+				$get_opt_var = array('jam_operasional_from','jam_operasional_to','jam_operasional_extra');
+				$get_opt = get_option_value($get_opt_var);
+		   }
+		}else{
+			$get_opt_var = array('jam_operasional_from','jam_operasional_to','jam_operasional_extra');
+			$get_opt = get_option_value($get_opt_var);
+		}
+		
+		$date_from = date("d-m-Y",$mktime_dari);
+		$date_till = date("d-m-Y",$mktime_sampai);
+			
+		//update report = jam_operasional
+		if(empty($get_opt['jam_operasional_from'])){
+			$jam_operasional_from = '07:00:01';
+		}else{
+			$jam_operasional_from = $get_opt['jam_operasional_from'].':01';
+		}
+		if(empty($get_opt['jam_operasional_to'])){
+			$jam_operasional_to = '23:00:00';
+		}else{
+			$jam_operasional_to = $get_opt['jam_operasional_to'].':00';
+		}
+		if(empty($get_opt['jam_operasional_extra'])){
+			$jam_operasional_extra = 0;
+		}else{
+			$jam_operasional_extra = $get_opt['jam_operasional_extra']*3600;
+		}
+		$jam_operasional_from = strtotime($date_from." ".$jam_operasional_from);
+		$jam_operasional_to = strtotime($date_till." ".$jam_operasional_to)+$jam_operasional_extra;
+		
+		$qdate_from = date("Y-m-d H:i:s",$jam_operasional_from);
+		$qdate_till = date("Y-m-d H:i:s",strtotime($date_till));
+		$qdate_till_max = date("Y-m-d H:i:s",$jam_operasional_to);
+		
+		$data_return = array('qdate_from' => $qdate_from, 'qdate_till' => $qdate_till, 'qdate_till_max' => $qdate_till_max);
+		return $data_return;
+	}
+}
+
+if( ! function_exists('check_maxview_cashierReport')){
+	function check_maxview_cashierReport($get_opt = array(), $mktime_dari = 0, $mktime_sampai = 0) {
+		
+		if(empty($scope)){
+			$scope =& get_instance();
+		}
+		
+		$role_id = $scope->session->userdata('role_id');	
+		
+		if(!empty($get_opt)){
+		   if(empty($get_opt['maxday_cashier_report']) OR empty($get_opt['jam_operasional_from']) OR empty($get_opt['jam_operasional_to'])){
+				$get_opt_var = array('role_id_kasir','maxday_cashier_report','jam_operasional_from','jam_operasional_to','jam_operasional_extra');
+				$get_opt = get_option_value($get_opt_var);
+		   }
+		}else{
+			$get_opt_var = array('role_id_kasir','maxday_cashier_report','jam_operasional_from','jam_operasional_to','jam_operasional_extra');
+			$get_opt = get_option_value($get_opt_var);
+		}
+
+		$maxday_cashier_report = 1;
+		if(!empty($get_opt['maxday_cashier_report'])){
+			$maxday_cashier_report = $get_opt['maxday_cashier_report'];
+		}
+		$role_id_kasir = explode(",",$get_opt['role_id_kasir']);
+		
+		$is_kasir = false;
+		if(in_array($role_id, $role_id_kasir)){
+			//kasir
+			$is_kasir = true;
+		}
+		
+		if($role_id == 1 OR $role_id == 2){
+			$is_kasir = false;
+		}
+		
+		
+		if($is_kasir == true){
+			
+			if(!empty($mktime_dari) OR !empty($mktime_sampai)){
+				
+				$todaydate = strtotime(date("d-m-Y"));
+				$todaydate_maxView = $todaydate - (ONE_DAY_UNIX*$maxday_cashier_report);
+				if($mktime_dari < $todaydate_maxView OR $mktime_sampai < $todaydate_maxView){
+					echo 'Silahkan Pilih Tanggal Laporan<br/>
+					Maksimal Lihat Laporan s/d Tanggal: <b>'.date("d-m-Y", $todaydate_maxView).'</b>';
+					die();
+				}
+				
+			}else{
+				echo 'Silahkan Pilih Tanggal Laporan';
+				die();
+			}
+		}
+		
+		$data_return = check_report_jam_operasional($get_opt, $mktime_dari, $mktime_sampai);
+		return $data_return;
+		//echo $role_id.' = '.$is_kasir.'<pre>'; print_r($role_id_kasir);die();
+		
     } 
 }
 ?>
