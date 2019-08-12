@@ -414,6 +414,20 @@ class MasterProduct extends MY_Controller {
 		if(!empty($get_data['data'])){
 			foreach ($get_data['data'] as $s){
 				
+				if(!empty($searching)){
+					if(strtolower($searching) == strtolower($s['item_code'])){
+						$s['item_code'] = $searching;
+						$s['product_code'] = $searching;
+					}
+					if(strtolower($searching) == strtolower($s['product_code'])){
+						$s['item_code'] = $searching;
+						$s['product_code'] = $searching;
+					}
+				}else{
+					$s['product_code'] = strtoupper($s['product_code']);
+					$s['item_code'] = strtoupper($s['item_code']);
+				}
+				
 				if(empty($s['item_code'])){
 					$s['item_code'] = $s['product_code'];
 				}
