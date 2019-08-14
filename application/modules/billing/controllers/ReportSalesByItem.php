@@ -62,7 +62,8 @@ class ReportSalesByItem extends MY_Controller {
 		
 		
 		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service','cashier_max_pembulatan',
-		'cashier_pembulatan_keatas','pembulatan_dinamis'));
+		'cashier_pembulatan_keatas','pembulatan_dinamis','role_id_kasir','maxday_cashier_report',
+		'jam_operasional_from','jam_operasional_to','jam_operasional_extra'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -88,12 +89,19 @@ class ReportSalesByItem extends MY_Controller {
 			
 			$mktime_dari = strtotime($date_from);
 			$mktime_sampai = strtotime($date_till);
-						
-			$qdate_from = date("Y-m-d",strtotime($date_from));
-			$qdate_till = date("Y-m-d",strtotime($date_till));
-			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+					
+			$ret_dt = check_maxview_cashierReport($get_opt, $mktime_dari, $mktime_sampai);
 			
-			$add_where = "(b.payment_date >= '".$qdate_from." 00:00:00' AND b.payment_date <= '".$qdate_till_max." 23:59:59')";
+			//$qdate_from = date("Y-m-d",strtotime($date_from));
+			//$qdate_till = date("Y-m-d",strtotime($date_till));
+			//$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+			//$add_where = "(b.payment_date >= '".$qdate_from." 07:00:00' AND b.payment_date <= '".$qdate_till_max." 06:00:00')";
+			
+			//laporan = jam_operasional
+			$qdate_from = $ret_dt['qdate_from'];
+			$qdate_till = $ret_dt['qdate_till'];
+			$qdate_till_max = $ret_dt['qdate_till_max'];
+			$add_where = "(b.payment_date >= '".$qdate_from."' AND b.payment_date <= '".$qdate_till_max."')";
 			
 			//b.tax_total, b.service_total,
 			//b.include_tax, b.tax_percentage, b.include_service, b.service_percentage, b.is_compliment,

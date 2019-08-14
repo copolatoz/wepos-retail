@@ -45,7 +45,9 @@ class ReportSales extends MY_Controller {
 			'diskon_sebelum_pajak_service' => 0
 		);
 		
-		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service','cashier_max_pembulatan','cashier_pembulatan_keatas'));
+		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service',
+		'cashier_max_pembulatan','cashier_pembulatan_keatas','role_id_kasir','maxday_cashier_report',
+		'jam_operasional_from','jam_operasional_to','jam_operasional_extra'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -66,12 +68,19 @@ class ReportSales extends MY_Controller {
 				
 			$mktime_dari = strtotime($date_from);
 			$mktime_sampai = strtotime($date_till);
-						
-			$qdate_from = date("Y-m-d",strtotime($date_from));
-			$qdate_till = date("Y-m-d",strtotime($date_till));
-			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+									
+			$ret_dt = check_maxview_cashierReport($get_opt, $mktime_dari, $mktime_sampai);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+			//$qdate_from = date("Y-m-d",strtotime($date_from));
+			//$qdate_till = date("Y-m-d",strtotime($date_till));
+			//$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+			//$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			
+			//laporan = jam_operasional
+			$qdate_from = $ret_dt['qdate_from'];
+			$qdate_till = $ret_dt['qdate_till'];
+			$qdate_till_max = $ret_dt['qdate_till_max'];
+			$add_where = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 			$this->db->from($this->table." as a");
@@ -416,7 +425,9 @@ class ReportSales extends MY_Controller {
 			'diskon_sebelum_pajak_service' => 0
 		);
 		
-		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service','cashier_max_pembulatan','cashier_pembulatan_keatas'));
+		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service',
+		'cashier_max_pembulatan','cashier_pembulatan_keatas','role_id_kasir','maxday_cashier_report',
+		'jam_operasional_from','jam_operasional_to','jam_operasional_extra'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -439,12 +450,19 @@ class ReportSales extends MY_Controller {
 			
 			$mktime_dari = strtotime($date_from);
 			$mktime_sampai = strtotime($date_till);
-						
-			$qdate_from = date("Y-m-d",strtotime($date_from));
-			$qdate_till = date("Y-m-d",strtotime($date_till));
-			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+				
+			$ret_dt = check_maxview_cashierReport($get_opt, $mktime_dari, $mktime_sampai);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+			//$qdate_from = date("Y-m-d",strtotime($date_from));
+			//$qdate_till = date("Y-m-d",strtotime($date_till));
+			//$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+			//$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			
+			//laporan = jam_operasional
+			$qdate_from = $ret_dt['qdate_from'];
+			$qdate_till = $ret_dt['qdate_till'];
+			$qdate_till_max = $ret_dt['qdate_till_max'];
+			$add_where = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name");
 			$this->db->from($this->table." as a");
@@ -981,7 +999,9 @@ class ReportSales extends MY_Controller {
 			'diskon_sebelum_pajak_service'	=> 0
 		);
 		
-		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service','cashier_max_pembulatan','cashier_pembulatan_keatas'));
+		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service',
+		'cashier_max_pembulatan','cashier_pembulatan_keatas','role_id_kasir','maxday_cashier_report',
+		'jam_operasional_from','jam_operasional_to','jam_operasional_extra'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -1004,12 +1024,19 @@ class ReportSales extends MY_Controller {
 			
 			$mktime_dari = strtotime($date_from);
 			$mktime_sampai = strtotime($date_till);
-						
-			$qdate_from = date("Y-m-d",strtotime($date_from));
-			$qdate_till = date("Y-m-d",strtotime($date_till));
-			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+				
+			$ret_dt = check_maxview_cashierReport($get_opt, $mktime_dari, $mktime_sampai);
 			
-			$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+			//$qdate_from = date("Y-m-d",strtotime($date_from));
+			//$qdate_till = date("Y-m-d",strtotime($date_till));
+			//$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+			//$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
+			
+			//laporan = jam_operasional
+			$qdate_from = $ret_dt['qdate_from'];
+			$qdate_till = $ret_dt['qdate_till'];
+			$qdate_till_max = $ret_dt['qdate_till_max'];
+			$add_where = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.user_firstname, e.user_lastname, f.bank_name");
 			$this->db->from($this->table." as a");
@@ -1371,7 +1398,9 @@ class ReportSales extends MY_Controller {
 			//'user_fullname'	=> $user_fullname
 		);
 		
-		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service','cashier_max_pembulatan','cashier_pembulatan_keatas'));
+		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service',
+		'cashier_max_pembulatan','cashier_pembulatan_keatas','role_id_kasir','maxday_cashier_report',
+		'jam_operasional_from','jam_operasional_to','jam_operasional_extra'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -1391,12 +1420,18 @@ class ReportSales extends MY_Controller {
 				
 			if(empty($date_from)){ $date_from = date('Y-m-d'); }
 			
-			$mktime_dari = strtotime($date_from);
-						
-			$qdate_from = date("Y-m-d",strtotime($date_from));
-			$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
+			$qdate_from_plus1 = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
 			
-			//$add_where = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_from_plus1." 23:59:59')";
+			//jam_operasional
+			$mktime_dari = strtotime($date_from);
+			$mktime_sampai = strtotime($date_from);
+			$ret_dt = check_report_jam_operasional($get_opt, $mktime_dari, $mktime_sampai);
+			$qdate_from = $ret_dt['qdate_from'];
+			$qdate_from_plus1_max = $ret_dt['qdate_till_max'];
+			
+			//$qdate_from = date("Y-m-d",strtotime($date_from));
+			//$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
+			//$add_where = "(a.payment_date >= '".$qdate_from." 07:00:01' AND a.payment_date <= '".$qdate_from_plus1." 06:00:00')";
 			
 			$where_shift_billing = '';
 			if(!empty($shift_billing)){
@@ -1405,8 +1440,8 @@ class ReportSales extends MY_Controller {
 				//get shift range
 				$this->db->from($this->prefix.'open_close_shift');
 				$this->db->where("user_shift",$shift_billing);
-				$this->db->where("(tanggal_shift = '".$qdate_from."' OR (tipe_shift = 'close' AND tanggal_shift = '".$qdate_till_max."' 
-				AND created <= '".$qdate_till_max." 23:59:59'))");
+				$this->db->where("(tanggal_shift = '".$qdate_from."' OR (tipe_shift = 'close' AND tanggal_shift = '".$qdate_from_plus1."' 
+				AND created <= '".$qdate_from_plus1_max."'))");
 				$get_shift = $this->db->get();
 				
 				if($get_shift->num_rows() > 0){
@@ -1487,15 +1522,14 @@ class ReportSales extends MY_Controller {
 					
 					$where_shift_billing = "(a.payment_date >= '".$qdate_from." ".$data_shift[$shift_billing]['jam_from']."' AND a.payment_date <= '".$qdate_till_max." ".$data_shift[$shift_billing]['jam_till']."')";
 					
-					/*	$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."') 
-					AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '".$data_shift[$shift_billing]['jam_from']."' AND '".$data_shift[$shift_billing]['jam_till']."')";*/
 					}
 				}else{
 					
-					//$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:00' AND '24:00:00')";
-					//$where_shift_billing = '(a.id = "-1")';
-					$where_shift_billing = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+					//$where_shift_billing = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 						
+					$qdate_from = $ret_dt['qdate_from'];
+					$qdate_till_max = $ret_dt['qdate_till_max'];
+					$where_shift_billing = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 					
 				}
 				
@@ -1508,7 +1542,10 @@ class ReportSales extends MY_Controller {
 				
 			}else{
 				//$where_shift_billing = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$qdate_from."')  AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '00:00:00' AND '24:00:00')";
-				$where_shift_billing = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+				//$where_shift_billing = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+				$qdate_from = $ret_dt['qdate_from'];
+				$qdate_till_max = $ret_dt['qdate_till_max'];
+				$where_shift_billing = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 			}
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.user_firstname, e.user_lastname, f.bank_name");
@@ -1869,7 +1906,9 @@ class ReportSales extends MY_Controller {
 			'diskon_sebelum_pajak_service'	=> 0
 		);
 		
-		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service'));
+		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service',
+		'role_id_kasir','maxday_cashier_report',
+		'jam_operasional_from','jam_operasional_to','jam_operasional_extra'));
 		if(!empty($get_opt['report_place_default'])){
 			$data_post['report_place_default'] = $get_opt['report_place_default'];
 		}
@@ -1887,12 +1926,19 @@ class ReportSales extends MY_Controller {
 			
 			$mktime_dari = strtotime($date_from);
 			$mktime_sampai = strtotime($date_till);
-						
-			$qdate_from = date("Y-m-d",strtotime($date_from));
-			$qdate_till = date("Y-m-d",strtotime($date_till));
-			$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+				
+			$ret_dt = check_maxview_cashierReport($get_opt, $mktime_dari, $mktime_sampai);
+					
+			//$qdate_from = date("Y-m-d",strtotime($date_from));
+			//$qdate_till = date("Y-m-d",strtotime($date_till));
+			//$qdate_till_max = date("Y-m-d",strtotime($date_till)+ONE_DAY_UNIX);
+			//$add_where = "(a.updated >= '".$qdate_from." 07:00:01' AND a.updated <= '".$qdate_till_max." 06:00:00')";
 			
-			$add_where = "(a.updated >= '".$qdate_from." 00:00:00' AND a.updated <= '".$qdate_till_max." 23:59:59')";
+			//laporan = jam_operasional
+			$qdate_from = $ret_dt['qdate_from'];
+			$qdate_till = $ret_dt['qdate_till'];
+			$qdate_till_max = $ret_dt['qdate_till_max'];
+			$add_where = "(a.updated >= '".$qdate_from."' AND a.updated <= '".$qdate_till_max."')";
 			
 			$this->db->select("a.*, a.id as billing_id, a.updated as billing_date, d.payment_type_name, e.bank_name, f.billing_no as merge_no");
 			$this->db->from($this->table." as a");
