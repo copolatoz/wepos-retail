@@ -2,12 +2,14 @@
 WePOS - Retail v.3.42.20 (Free Version)
 
 Cocok untuk:
-Retail/Merchant/Toko, Butik, Salon (semua penjualan berbasis Retail)
+Retail/Toko (semua penjualan berbasis Retail)
 
 Terima Kasih sudah Download dan Support WePOS.id, 
 WePOS sudah dibuat sejak tahun 2015, update bertahap sesuai kebutuhan Retail 
 
-WePOS merupakan Karya anak bangsa, support Team WePOS dengan Donasi dari rekan-rekan
+untuk versi Cafe/Resto: https://github.com/copolatoz/WePOS-Free
+
+*untuk auto update: silahkan daftarkan merchant/cafe/resto untuk mendapatkan merchant-key
 
 #Cara Instalasi:
 1. Install XAMPP 5.5.24 atau 5.6.32
@@ -42,40 +44,16 @@ WePOS merupakan Karya anak bangsa, support Team WePOS dengan Donasi dari rekan-r
 5. Koneksikan dengan wepos.id -> jika mempunyai merchant key berbayar silahkan koneksikan pada module 'Client Info', aplikasi akan otomatis update sesuai varian berbayar
 
 *Untuk Instalasi lengkap bisa baca di dokumentasi (login website, wepos.id)
-
-#Silahkan Donasi untuk versi yang lebih baik ^^ 
+#Silahkan Donasi untuk versi gratisan yang lebih baik ^^ 
 #terima kasih untuk rekan-rekan yang sudah support WePOS
 
 Team WePOS ^^
-
-contact@wepos.id / angga.nugraha@gmail.com
+contact@wepos.id 
+081222549676 // 087722294411
 
 *SELALU DUKUNG KARYA ANAK BANGSA!! 
 *JANGAN MALU UNTUK BERTANYA - GRATIS KONSULTASI
 
-
-# Update April 2019 - Retail v.3.42.20
-- Menu Baru: PPOB 
-- Database update
-- Opsi Baru Setup Aplikasi
-- Loader Notify
-- Backup & Sync DB Online
-- update HPP (dinamis)
-- Varian Menu & Varian Item
-- Upload Excel Master Item
-- Product Package -> Gabungan Produk2
-- Product: Item List (CutStock Otomatis / Gramasi / CoGS)
-- Status Print Cashier
-- Cashier Receipt New Format & Settlement
-- AutoCut Stok Option: Langsung & Tidak Langsung (via Usage & Waste)
-- Laporan Baru: Tax, Package, Summary Sales Report (SSR)
-- Update Purchasing & Receiving -> penggunaan SN/IMEI & Stok SN/IMEI
-- Update Inventory Module
-- Filter Pencarian per-Item di Daftar Stok
-- Warning Stok Jika Terlihat Minus (-)
-- Alert jika selisih HPP < Harga Jual
-- AR/Hutang on Settlement & SSR
-- Update module Finance: AR (Hutang) & AP (Piutang)
 
 
 
