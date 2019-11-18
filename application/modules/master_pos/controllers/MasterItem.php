@@ -327,7 +327,7 @@ class MasterItem extends MY_Controller {
 			
 		// Default Parameter
 		$params = array(
-			'fields'		=> 'a.id, a.item_code, a.item_sku, a.item_name, a.item_price, a.sales_price, a.item_hpp, a.last_in, a.unit_id, b.unit_name, a.use_stok_kode_unik',
+			'fields'		=> 'a.id, a.item_code, a.item_sku, a.item_name, a.item_price, a.sales_price, a.item_hpp, a.last_in, a.unit_id, b.unit_code, b.unit_name, a.use_stok_kode_unik',
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table.' as a',
 			'join'			=> array(
@@ -466,6 +466,11 @@ class MasterItem extends MY_Controller {
 				$s['item_hpp_show'] = 'Rp '.priceFormat($s['item_hpp']);
 				$s['last_in_show'] = 'Rp '.priceFormat($s['last_in']);
 				$s['item_code_name'] = $s['item_code'].' / '.$s['item_name'];
+				
+				$s['use_stok_kode_unik_text'] = '<font color="red">Tidak</font>';
+				if(!empty($s['use_stok_kode_unik'])){
+					$s['use_stok_kode_unik_text'] = '<font color="green">Ya</font>';
+				}
 				
 				if($use_current_stock == true){
 					if(in_array($s['id'], $all_item_stock)){
@@ -1806,11 +1811,10 @@ class MasterItem extends MY_Controller {
 		$time_create_update = date('Y-m-d H:i:s');
 		$session_user = $this->session->userdata('user_username');
 		
-		$all_product_id = array();
-			
 		if(!empty($all_id_ref_item)){
 			$all_id_ref_item_sql = implode(",", $all_id_ref_item);
 					
+			$all_product_id = array();
 			$all_product_ref_id = array();
 			$all_item_price = array();
 			

@@ -230,11 +230,91 @@ class ListStock extends MY_Controller {
       	die(json_encode($get_data));
 	}
 	
+	public function itemKodeUnik()
+	{
+		$this->table_items = $this->prefix.'items';
+		$this->table_item_kode_unik = $this->prefix.'item_kode_unik';
+		$this->table_storehouse = $this->prefix.'storehouse';
+		$session_client_id = $this->session->userdata('client_id');	
+				
+		if(empty($session_client_id)){
+			die(json_encode(array('data' => array(), 'totalCount' => 0)));
+		}
+		
+		$storehouse_id = $this->input->post('storehouse_id');
+		if(empty($storehouse_id)){
+			$storehouse_id = -1;
+		}
+		
+		$params = array(
+			'fields'		=> 'a.*, c.storehouse_code, c.storehouse_name',
+			'primary_key'	=> 'a.id',
+			'table'			=> $this->table_item_kode_unik.' as a',
+			'join'			=> array(
+									'many', 
+									array( 
+										array($this->table_items.' as b','a.id = a.item_id','LEFT'),
+										array($this->table_storehouse.' as c','c.id = a.storehouse_id','LEFT')
+									) 
+								),
+			'where'			=> array('a.is_deleted' => 0),
+			'order'			=> array('a.date_in' => 'DESC'),
+			'single'		=> false,
+			'output'		=> 'array' //array, object, json
+		);
+		
+		//DROPDOWN & SEARCHING
+		$searching = $this->input->post('query');
+		$item_id = $this->input->post('item_id');
+		
+		$keywords = $this->input->post('keywords');
+		if(!empty($keywords)){
+			$searching = $keywords;
+		}
+		
+		if(!empty($searching)){
+			$params['where'][] = "(a.kode_unik LIKE '%".$searching."%' OR a.varian_name LIKE '%".$searching."%' OR a.varian_group LIKE '%".$searching."%')";
+		}
+		if(empty($item_id)){
+			$item_id = -1;
+		}
+		
+		$params['where'][] = "(a.item_id = ".$item_id." AND a.storehouse_id = ".$storehouse_id.")";
+		
+		//get data -> data, totalCount
+		$get_data = $this->m->find_all($params);
+		  	
+
+		$newData = array();				
+		if(!empty($get_data['data'])){
+			foreach ($get_data['data'] as $s){
+				
+				$s['date_in_show'] = date("d-m-Y",strtotime($s['date_in']));
+				$s['item_hpp_show'] = priceFormat($s['item_hpp']);
+				
+				$s['status_imei'] = '<font color="green">Ada</font>';
+				if(!empty($s['ref_out'])){
+					$s['status_imei'] = '<font color="red">Terjual</font>';
+					//$s['storehouse_name'] = '-';
+					//$s['storehouse_code'] = '-';
+				}
+				
+				array_push($newData, $s);
+			}
+		}
+  		
+		$get_data['data'] = $newData;
+		$get_data['totalCount'] = count($newData);
+		
+      	die(json_encode($get_data));
+	}
+	
 	public function gridDataDetail()
 	{
 		
 		$this->table_stock_rekap = $this->prefix.'stock_rekap';
 		$this->table_items = $this->prefix.'items';
+		$this->table_storehouse = $this->prefix.'storehouse';
 		$this->table_unit = $this->prefix.'unit';
 		$session_client_id = $this->session->userdata('client_id');	
 				
@@ -265,10 +345,12 @@ class ListStock extends MY_Controller {
 		$alert_hpp_vs_sales = 0;
 		
 		// Default Parameter
-		$this->db->select('a.*, b.item_name, b.item_code, b.item_price, b.sales_price, b.unit_id, b.use_for_sales, b.min_stock, c.unit_name');
+		$this->db->select('a.*, b.item_name, b.item_code, b.item_price, b.sales_price, b.unit_id, b.use_for_sales, b.min_stock, b.use_stok_kode_unik, 
+		c.unit_name, d.storehouse_code, d.storehouse_name');
 		$this->db->from($this->table_stock_rekap.' as a');
 		$this->db->join($this->table_items.' as b',"b.id = a.item_id","LEFT");
 		$this->db->join($this->table_unit.' as c',"c.id = b.unit_id","LEFT");
+		$this->db->join($this->table_storehouse.' as d',"d.id = a.storehouse_id","LEFT");
 		$this->db->where("a.trx_date", $tanggal);
 		$this->db->where("a.storehouse_id", $storehouse_id);
 		$this->db->where("b.is_deleted = 0");
@@ -292,6 +374,11 @@ class ListStock extends MY_Controller {
 				$dt['item_hpp_show'] = priceFormat($dt['item_hpp']);
 				$selisih = $dt['sales_price'] - $dt['item_hpp'];
 				$dt['sales_price_show'] = priceFormat($dt['sales_price']);
+				
+				$dt['use_stok_kode_unik_text'] = '<font color="red">Tidak</font>';
+				if(!empty($dt['use_stok_kode_unik'])){
+					$dt['use_stok_kode_unik_text'] = '<font color="green">Ya</font>';
+				}
 				
 				if($selisih < 0 AND $dt['use_for_sales'] == 1){
 					$dt['sales_price_show'] = '<b style="color:red">'.$dt['sales_price_show'].'</b>';

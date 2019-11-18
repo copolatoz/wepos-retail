@@ -1,5 +1,6 @@
 
-WePOS - Retail v.3.42.20 (Free Version)
+WePOS - Retail v.3.42.21 (Free Version)
+Updated: 19-11-2019 00:00:00
 
 Cocok untuk:
 Retail/Toko (semua penjualan berbasis Retail)
@@ -12,7 +13,7 @@ untuk versi Cafe/Resto: https://github.com/copolatoz/WePOS-Free
 *untuk auto update: silahkan daftarkan merchant/cafe/resto untuk mendapatkan merchant-key
 
 #Cara Instalasi:
-1. Install XAMPP 5.5.24 atau 5.6.32
+1. Install XAMPP 5.5.24 atau 5.6.32 (Belum support PHP > 7)
 2. copy-paste folder hasil download aplikasi 'wepos-retail' ke xampp/htdocs/
 
 	#copy dan rename file:
@@ -34,9 +35,13 @@ untuk versi Cafe/Resto: https://github.com/copolatoz/WePOS-Free
 
 	#Mengganti URL menjadi http://localhost/nama-retail-anda
 	1. ganti nama folder download 'wepos-retail' menjadi 'nama-retail-anda'
-	2. ubah text pada file .htaccess 'wepos-retail' menjadi 'nama-retail-anda'
+	2. ubah text pada file .htaccess "RewriteBase /retail-free/" menjadi "RewriteBase /nama-retail-anda"
 		*jika .htaccess tidak ditemukan, ubah settingan folder anda agar dapat melihat hidden file dan ekstensi file
 		*gunakan editor semisal notepad++ untuk save-as atau membuat/edit file .htaccess
+
+	#Integrasi dengan WePOS.Cashier App (Android)
+	1. ganti nama folder download 'wepos-retail' menjadi 'wepos'
+	2. ubah isi .htaccess: "RewriteBase /retail-free/" menjadi "RewriteBase /wepos"
 
 
 4. untuk setup printer Thermal -> silahkan download extension PHP di website (login wepos.id)
@@ -45,9 +50,9 @@ untuk versi Cafe/Resto: https://github.com/copolatoz/WePOS-Free
 
 *Untuk Instalasi lengkap bisa baca di dokumentasi (login website, wepos.id)
 #Silahkan Donasi untuk versi gratisan yang lebih baik ^^ 
-#terima kasih untuk rekan-rekan yang sudah support WePOS
+#terima kasih untuk rekan-rekan yang sudah support WePOS.id
 
-Team WePOS ^^
+Team WePOS.id ^^
 contact@wepos.id 
 081222549676 // 087722294411
 

@@ -44,7 +44,11 @@ class DataBilling extends MY_Controller {
 		//is_active_text
 		$sortAlias = array(
 			'is_active_text' => 'a.is_active',
-			'billing_date' => 'a.created'
+			'billing_date' => 'a.created',
+			'updated_date' => 'a.updated',
+			'table_no' => 'a.table_no',
+			'billing_no_show' => 'a.billing_no',
+			'updatedby' => 'a.updatedby'
 		);		
 		
 		// Default Parameter
@@ -59,6 +63,7 @@ class DataBilling extends MY_Controller {
 								a.discount_perbilling, a.total_return, a.compliment_total_tax_service, a.is_half_payment,
 								a.sales_id, a.sales_percentage, a.sales_price, a.sales_type, a.customer_id,
 								a.id as billing_id, b.table_name, b.table_no, b.table_desc, b.floorplan_id, c.floorplan_name, a.is_salesorder, 
+								a.txmark, a.txmark_no,
 								d.payment_type_name, e.user_firstname, e.user_lastname, f.bank_name, 
 								g.billing_no as merge_billing_no, h.sales_name, h.sales_company, i.customer_name',
 			'primary_key'	=> 'id',
@@ -101,6 +106,7 @@ class DataBilling extends MY_Controller {
 		$keywords = $this->input->post('keywords');
 		$use_range_date = $this->input->post('use_range_date');
 		$by_product_order = $this->input->post('by_product_order');
+		$txmark_only = $this->input->post('txmark_only');
 		if(!empty($keywords)){
 			$searching = $keywords;
 		}
@@ -113,6 +119,9 @@ class DataBilling extends MY_Controller {
 		if(!empty($user_cashier)){
 			//$this->db->where('a.updatedby', $user_cashier);
 			$params['where'][] = "(a.updatedby = '".$user_cashier."')";
+		}
+		if(!empty($txmark_only)){
+			$params['where'][] = "(a.txmark = 1)";
 		}
 		
 		if(!empty($shift_billing)){
@@ -128,7 +137,7 @@ class DataBilling extends MY_Controller {
 				
 				$mktime_dari = strtotime($date_from);
 							
-				$date_from = date("Y-m-d",strtotime($date_from));		
+				//$date_from = date("Y-m-d",strtotime($date_from));		
 			}
 			
 			$qdate_from_plus1 = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
@@ -350,14 +359,14 @@ class DataBilling extends MY_Controller {
 		
 		if(!empty($by_product_order)){
 			
-			$this->db->select("DISTINCT(a.billing_id)");
+			$this->db->select("DISTINCT(a.billing_id), b.product_name");
 			$this->db->from($this->table2." as a");
 			$this->db->join($this->prefix.'product as b',"b.id = a.product_id","LEFT");
 			
 			if(!empty($searching)){
 				$this->db->where("b.product_name LIKE '%".$searching."%'");
 			}else{
-				$this->db->where("b.product_id = -1");
+				$this->db->where("a.product_id = -1");
 			}
 			
 			$get_det = $this->db->get();
@@ -418,6 +427,13 @@ class DataBilling extends MY_Controller {
 				$s['item_no'] = $no;
 				$s['payment_date'] = date("d-m-Y H:i",strtotime($s['payment_date']));
 				$s['billing_date'] = date("d-m-Y H:i",strtotime($s['created']));
+				
+				if(empty($s['group_date'])){
+					$s['group_date'] = date("d-m-Y",strtotime($s['created']));
+				}else{
+					$s['group_date'] = date("d-m-Y",strtotime($s['group_date']));
+				}
+				
 				$s['created_datetime'] = date("d.m.Y H:i",strtotime($s['created']));
 				
 				$s['created_date'] = date("d-m-Y H:i",strtotime($s['created']));
@@ -507,13 +523,16 @@ class DataBilling extends MY_Controller {
 				
 				//NOTES
 				$s['payment_note'] = '';
+				$s['payment_note2'] = '';
 				if(!empty($s['is_compliment'])){
 					$s['payment_note'] = 'COMPLIMENT';
+					$s['payment_note2'] = 'COMPLIMENT';
 				}
 				
 				if($s['billing_status'] == 'paid'){
 					if(!empty($s['is_half_payment'])){
 						$s['payment_note'] = 'HALF PAYMENT';
+						$s['payment_note2'] = 'HALF';
 						
 						$s['total_paid'] = $s['total_cash'];
 						$s['total_paid_show'] = priceFormat($s['total_paid']);
@@ -538,6 +557,17 @@ class DataBilling extends MY_Controller {
 				//if(strtolower($s['payment_type_name']) != 'cash'){
 				if($s['payment_id'] != $payment_id_cash){
 					$s['payment_note'] = strtoupper($s['bank_name']).' '.$s['card_no'];
+					
+					if(empty($s['payment_note2'])){
+						$s['payment_note2'] = $s['payment_type_name'].' / '.strtoupper($s['bank_name']);
+					}else{
+						$s['payment_note2'] .= '-'.$s['payment_type_name'].' / '.strtoupper($s['bank_name']);
+					}
+					
+				}else{
+					if(empty($s['payment_note2'])){
+						$s['payment_note2'] = 'CASH';
+					}
 				}
 				
 				if(empty($s['payment_id'])){
@@ -578,6 +608,11 @@ class DataBilling extends MY_Controller {
 				$s['billing_no_show'] = $s['billing_no'];
 				if(!empty($s['is_reservation'])){
 					$s['billing_no_show'] = 'R'.$s['billing_no'];
+				}
+				
+				$s['txmark_no_show'] = '-';
+				if(!empty($s['txmark_no'])){
+					$s['txmark_no_show'] = '<span style="color:green;font-weight:bold;">'.$s['txmark_no'].'</span>';
 				}
 				
 				$newData[$s['id']] = $s;
@@ -2325,6 +2360,14 @@ class DataBilling extends MY_Controller {
 			$post_data['curr_grand_total'] = $dt_billing->grand_total;
 			$post_data['curr_compliment_total'] = $dt_billing->compliment_total;
 			$post_data['curr_pembulatan'] = $dt_billing->total_pembulatan;
+			
+			if(!empty($show_txmark)){
+				if($dt_billing->txmark == 1 AND !empty($dt_billing->txmark_no)){
+					$dt_billing->billing_no = $dt_billing->txmark_no;
+					$post_data['curr_billing_no'] = $dt_billing->billing_no;
+				}
+			}
+			
 		}
 		
 		$post_data['billing_data'] = (array) $dt_billing;

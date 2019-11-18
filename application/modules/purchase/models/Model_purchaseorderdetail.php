@@ -59,9 +59,11 @@ class Model_purchaseorderdetail extends DB_Model {
 					unset($dt['po_receive_total_show']);
 					unset($dt['ro_number']);
 					unset($dt['ro_id']);
+					unset($dt['po_detail_subtotal']);
 					unset($dt['po_detail_total_show']);
 					unset($dt['po_detail_purchase_show']);
 					unset($dt['po_detail_potongan_show']);
+					unset($dt['po_detail_tax_show']);
 					unset($dt['supplier_id']);
 					unset($dt['supplier_name']);
 					unset($dt['item_image']);
@@ -71,6 +73,7 @@ class Model_purchaseorderdetail extends DB_Model {
 					unset($dt['item_code_name']);
 					unset($dt['item_name']);
 					unset($dt['unit_name']);
+					unset($dt['unit_code']);
 					unset($dt['nomor']);
 					unset($dt['from_supplier_item']);
 					

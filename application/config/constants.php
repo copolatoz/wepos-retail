@@ -28,13 +28,14 @@ else
 }
 
 // Define these values to be used later on
-$APPPATH_PATH = str_replace('/','',APPPATH);
+//$APPPATH_PATH = str_replace('/','',APPPATH);
+$APPPATH_PATH = APPPATH;
 define('BASE_URL', $base_url);
 define('BASE_URI', $base_uri);
 define('APP_URI', BASE_URI.APPPATH);
 define('APP_PATH', FCPATH.$APPPATH_PATH);
 define('APP_URL', BASE_URL.APPPATH);
-define('MODULE_PATH', $APPPATH_PATH.'/modules/');
+define('MODULE_PATH', $APPPATH_PATH.'modules/');
 define('MODULE_URL', BASE_URL.APPPATH.'modules/');
 
 // We dont need these variables any more

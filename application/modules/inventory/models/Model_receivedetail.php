@@ -8,12 +8,14 @@ class Model_receivedetail extends DB_Model {
 		parent::__construct();	
 		$this->prefix = config_item('db_prefix2');
 		$this->table = $this->prefix.'receive_detail';
+		$this->table_receive_kode_unik = $this->prefix.'receive_kode_unik';
 		$this->table_storehouse = $this->prefix.'storehouse';
 	}
 	
-	function receiveDetail($receiveDetail = '', $receive_id = '', $update_stok = ''){
+	function receiveDetail($receiveDetail = '', $receive_id = '', $update_stok = '', $data_kodeunik = array()){
 				
 		$session_user = $this->session->userdata('user_username');
+		$id_user = $this->session->userdata('id_user');
 		
 		$update_stock_item_unit = array();
 		$all_item_updated = array();
@@ -33,7 +35,6 @@ class Model_receivedetail extends DB_Model {
 			$update_stok = 'update';
 			$from_add = true;
 		}
-		
 		
 		if(!empty($receiveDetail)){
 			
@@ -211,20 +212,23 @@ class Model_receivedetail extends DB_Model {
 			$dtUpdate = array();
 			
 			$dtInsert_kode_unik = array();
+			$dtUpdate_kode_unik = array();
 			$all_unik_kode = array();
-			
 			if(!empty($dt_rowguid) AND !empty($receiveDetail)){
 				foreach($receiveDetail as $dt){
 					
 					$dt['storehouse_id'] = $storehouse_id;
 					$receive_det_qty_before = $dt['receive_det_qty_before'];
 					$item_id_real = $dt['item_id_real'];
+					$get_temp_id = $dt['temp_id'];
+					unset($dt['temp_id']);
 					unset($dt['receive_number']);
 					unset($dt['item_id_real']);
 					unset($dt['item_code']);
 					unset($dt['item_code_name']);
 					unset($dt['item_name']);
 					unset($dt['item_image']);
+					unset($dt['unit_code']);
 					unset($dt['unit_name']);
 					unset($dt['item_price']);
 					unset($dt['nomor']);
@@ -236,40 +240,7 @@ class Model_receivedetail extends DB_Model {
 					unset($dt['receive_det_qty_before']);
 					
 					$receive_det_date = date("Y-m-d",strtotime($dt['receive_det_date']));
-					
-					if(!empty($dt['receive_det_varian_name'])){
-						$dt['receive_det_varian_name'] = trim($dt['receive_det_varian_name']);
-						$dt['receive_det_varian_group'] = strtolower($dt['receive_det_varian_name']);
-					}else{
-						$dt['receive_det_varian_name'] = '';
-						$dt['receive_det_varian_group'] = '';
-					}
-					
-					//UNIK KODE
-					if($dt['use_stok_kode_unik'] == 1){
-						$list_dt_kode = explode("\n",$dt['data_stok_kode_unik']);
-						foreach($list_dt_kode as $kode_unik){
-							if(!empty($kode_unik)){
-								if(!in_array($kode_unik, $all_unik_kode)){
-									$all_unik_kode[] = $kode_unik;
-									
-									$dtInsert_kode_unik[] = array(
-										"item_id" => $item_id_real,
-										"kode_unik" => $kode_unik,
-										"ref_in" => $receive_number,
-										"date_in" => $rl_date.' '.date("H:i:s"),
-										"storehouse_id" => $storehouse_id,
-										"item_hpp" => $dt['receive_det_purchase'],
-										"varian_name" => $dt['receive_det_varian_name'],
-										"varian_group" => $dt['receive_det_varian_group']
-									);
-									
-								}
-							}
-							
-						}
-						
-					}
+					$dt['receive_det_date'] = $receive_det_date;
 					
 					//SURE ONLY UPDATE!
 					if(($update_stok == 'update' OR $update_stok == 'rollback') AND !empty($dt['receive_det_qty'])){
@@ -310,44 +281,68 @@ class Model_receivedetail extends DB_Model {
 						);
 					}
 					
-					if(!empty($dtCurrent_qty_before[$dt['id']])){
+					//if(!empty($dtCurrent_qty_before[$dt['id']])){
 						//$receive_det_qty_before = $dtCurrent_qty_before[$dt['id']];
-					}
+					//}
 					
-					$dt['receive_det_date'] = $receive_det_date;
-										
+								
 					//$dt['current_stock'] = 0;
 					//if(!empty($all_stock_before_item[$item_id_real])){
 					//	$dt['current_stock'] = $all_stock_before_item[$item_id_real];
 					//}
-			
+					
 					if(empty($all_receive_po_det_qty[$dt['po_detail_id']])){
 						$all_receive_po_det_qty[$dt['po_detail_id']] = 0;
 					}
 					
 					$all_receive_po_det_qty[$dt['po_detail_id']] += ($dt['receive_det_qty'] - $receive_det_qty_before);
 					
-					/* DEPRECATED -- USE STOCK REKAP
-					$dtUpdate_Items[] = array(
-							"id" => $item_id_real,
-							"total_qty_stok" => $dt['current_stock'] + ($dt['receive_det_qty'] - $receive_det_qty_before)
-					);
-					*/
-					
 					$total_qty += ($dt['receive_det_qty']);
 					
 					//check if new
-					if(strstr($dt['id'], 'new_')){
-						unset($dt['id']);
-					}
-						
 					$dt['receive_id'] = $receive_id;
+					$received_id = $dt['id'];
+					$is_new = false;
+					if(strstr($received_id, 'new')){
 						
-					if(empty($dt['id'])){
-					
+						//$received_id_exp = explode("-", $dt['id']);
+						//unset($received_id_exp[3]);
+						//$received_id = implode("-",$received_id_exp);
+						
+						$received_id = $get_temp_id;
 						unset($dt['id']);
-						$dtInsert[] = $dt;
+						$is_new = true;
+					}
 					
+					//SN/IMEI --------------
+					if($dt['use_stok_kode_unik'] == 1){
+						
+						if(!empty($data_kodeunik[$received_id])){
+							foreach($data_kodeunik[$received_id] as $dtD){
+								if(!in_array($dtD['kode_unik'], $all_unik_kode)){
+									$all_unik_kode[] = $dtD['kode_unik'];
+									
+									$dtInsert_kode_unik[] = array(
+										"item_id" => $dt['item_id'],
+										"kode_unik" => $dtD['kode_unik'],
+										"ref_in" => $receive_number,
+										"date_in" => $rl_date.' '.date("H:i:s"),
+										"storehouse_id" => $storehouse_id,
+										"item_hpp" => $dt['receive_det_purchase'],
+										"varian_name" => $dtD['varian_name'],
+										"varian_group" => $dtD['varian_name']
+									);
+									
+								}
+							}
+						}
+					}
+					
+					
+					if($is_new){
+					
+						$dtInsert[] = $dt;
+						
 					}else{
 							
 						$dtUpdate[] = $dt;
@@ -355,12 +350,14 @@ class Model_receivedetail extends DB_Model {
 						if(!in_array($dt['id'], $dtNew)){
 							$dtNew[] = $dt['id'];
 						}
+						
 					}
 				}
 			}
 			
 			//delete if not exist
 			$dtDelete = array();
+			$delete_all = false;
 			if(!empty($dtNew)){
 				foreach($dtCurrent as $dtR){
 					if(!in_array($dtR, $dtNew)){
@@ -370,34 +367,88 @@ class Model_receivedetail extends DB_Model {
 			}else{
 				//delete all
 				$dtDelete = $dtCurrent;
+				$delete_all = true;
 			}
 
 			//if($update_stok){
-			//	echo '<pre>';
-			//	print_r($receiveDetail);
+				//echo '<pre>';
+				//print_r($dtInsert_kode_unik);
 			//	print_r($all_receive_po_det_qty);
-			//	die();
+				//die();
 			//}
 			
+			
+			//return array('update_stok' => $update_stok);
+			
+			
 			if(!empty($dtDelete)){
+				
 				$allRowguid = implode("','", $dtDelete);
 				$this->db->where("id IN ('".$allRowguid."')");
 				$this->db->delete($this->table); 
+				
+				//delete SN/IMEI detail
+				if($delete_all == true AND $update_stok == 'update'){
+					$allRowguid = implode("','", $dtDelete);
+					$this->db->where("received_id IN ('".$allRowguid."')");
+					$this->db->delete($this->table_receive_kode_unik); 
+					//return array('dtDelete' => $dtDelete);
+				}
 			}
 			
 			if(!empty($dtInsert)){
 				$this->db->insert_batch($this->table, $dtInsert);
+				
+				//update SN/IMEI detail - update received_id
+				$all_temp_update = array();
+				$all_received_update = array();
+				$update_temp_id = array();
+				$all_update_temp_id = array();
+				$this->db->from($this->prefix.'receive_detail');
+				$this->db->where("receive_id", $receive_id);
+				$get_det = $this->db->get();
+				if($get_det->num_rows() > 0){
+					foreach($get_det->result() as $dt){
+						
+						$temp_id = 'new-'.$id_user.'-'.$dt->po_detail_id;
+						if(!in_array($temp_id, $all_temp_update)){
+							$all_temp_update[] = $temp_id;
+							$all_received_update[] = $dt->id;
+							$update_temp_id[$temp_id] = $dt->id;
+							$all_update_temp_id[] = array(
+								'temp_id'	=> $temp_id,
+								'received_id'	=> $dt->id
+							);
+						}
+						
+					}
+				}
+				
+				if(!empty($all_update_temp_id)){
+					$this->db->update_batch($this->table_receive_kode_unik, $all_update_temp_id, "temp_id");
+				}
+				
+				if(!empty($all_received_update)){
+					$all_received_update_sql = implode(",", $all_received_update);
+					$all_update_temp_data = array(
+						'temp_id'	=> ''
+					);
+					$this->db->update($this->table_receive_kode_unik, $all_update_temp_data, "received_id IN (".$all_received_update_sql.")");
+				}
+				
 			}
 			
 			if(!empty($dtUpdate)){
 				$this->db->update_batch($this->table, $dtUpdate, 'id');
+				
+				//update SN/IMEI detail - not effected
 			}			
 			
 
 			//UPDATE BATCH total Items
-			if(!empty($dtUpdate_Items)){
-				$this->db->update_batch($this->prefix."items", $dtUpdate_Items, "id");
-			}
+			//if(!empty($dtUpdate_Items)){
+			//	$this->db->update_batch($this->prefix."items", $dtUpdate_Items, "id");
+			//}
 			
 			//UPDATE PO DETAIL
 			if(!empty($all_receive_po_det_qty)){
@@ -433,7 +484,9 @@ class Model_receivedetail extends DB_Model {
 					
 					$this->db->where("ref_in", $receive_number);
 					$this->db->delete($this->prefix."item_kode_unik"); 
+					
 				}else{
+					
 					//UPDATE STOCK TRX
 					if(!empty($dtInsert_stock)){
 						$this->db->insert_batch($this->prefix.'stock', $dtInsert_stock);

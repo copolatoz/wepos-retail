@@ -21,11 +21,17 @@ class itemSubCategory extends MY_Controller {
 		
 		// Default Parameter
 		$params = array(
-			'fields'		=> '*',
-			'primary_key'	=> 'id',
-			'table'			=> $this->table,
-			'where'			=> array('is_deleted' => 0),
-			'order'			=> array('id' => 'ASC'),
+			'fields'		=> 'a.*, b.item_category_name, b.item_category_code',
+			'primary_key'	=> 'a.id',
+			'table'			=> $this->table.' as a',
+			'join'			=> array(
+									'many', 
+									array( 
+										array($this->prefix.'item_category as b','b.id = a.item_category_id','LEFT')
+									) 
+								),
+			'where'			=> array('a.is_deleted' => 0),
+			'order'			=> array('a.id' => 'DESC'),
 			'sort_alias'	=> $sortAlias,
 			'single'		=> false,
 			'output'		=> 'array' //array, object, json
@@ -36,14 +42,18 @@ class itemSubCategory extends MY_Controller {
 		$searching = $this->input->post('query');
 		$show_all_text = $this->input->post('show_all_text');
 		$show_choose_text = $this->input->post('show_choose_text');
+		$keywords = $this->input->post('keywords');
 		
+		if(!empty($keywords)){
+			$searching = $keywords;
+		}
 		if(!empty($is_dropdown)){
 			//$params['order'] = array('item_subcategory_desc' => 'ASC');
 			$params['order'] = array('id' => 'ASC');
 			//$params['where'] = array('parent_id != 0');
 		}
 		if(!empty($searching)){
-			$params['where'][] = "(item_subcategory_name LIKE '%".$searching."%' OR item_subcategory_desc LIKE '%".$searching."%')";
+			$params['where'][] = "(a.item_subcategory_name LIKE '%".$searching."%' OR a.item_subcategory_desc LIKE '%".$searching."%' OR b.item_category_name LIKE '%".$searching."%')";
 		}
 		
 		//get data -> data, totalCount
@@ -84,6 +94,7 @@ class itemSubCategory extends MY_Controller {
 		$item_subcategory_name = $this->input->post('item_subcategory_name');
 		$item_subcategory_code = strtoupper($this->input->post('item_subcategory_code'));
 		$item_subcategory_desc = $this->input->post('item_subcategory_desc');
+		$item_category_id = $this->input->post('item_category_id');
 		
 		if(empty($item_subcategory_name)){
 			$r = array('success' => false);
@@ -123,6 +134,7 @@ class itemSubCategory extends MY_Controller {
 				    'item_subcategory_name'  	=> 	$item_subcategory_name,
 				    'item_subcategory_code'  	=> 	$item_subcategory_code,
 					'item_subcategory_desc'	=>	$item_subcategory_desc,
+					'item_category_id'	=>	$item_category_id,
 					'created'		=>	date('Y-m-d H:i:s'),
 					'createdby'		=>	$session_user,
 					'updated'		=>	date('Y-m-d H:i:s'),
@@ -153,6 +165,7 @@ class itemSubCategory extends MY_Controller {
 				    'item_subcategory_name'  	=> 	$item_subcategory_name,
 				    'item_subcategory_code'  	=> 	$item_subcategory_code,
 					'item_subcategory_desc'	=>	$item_subcategory_desc,
+					'item_category_id'	=>	$item_category_id,
 					'updated'		=>	date('Y-m-d H:i:s'),
 					'updatedby'		=>	$session_user,
 					'is_active'		=>	$is_active

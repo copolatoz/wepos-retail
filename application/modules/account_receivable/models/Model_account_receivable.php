@@ -10,8 +10,8 @@ class Model_account_receivable extends DB_Model {
 		$this->prefix = config_item('db_prefix3');
 		$this->prefix_app = config_item('db_prefix2');
 		$this->table_account_receivable = $this->prefix.'account_receivable';
-		$this->table_reservation = $this->prefix_app.'reservation';
-		$this->table_reservation_detail = $this->prefix_app.'reservation_detail';
+		$this->table_salesorder = $this->prefix_app.'salesorder';
+		$this->table_salesorder_detail = $this->prefix_app.'salesorder_detail';
 		$this->table_billing = $this->prefix_app.'billing';
 		$this->table_billing_detail = $this->prefix_app.'billing_detail';
 		$this->table_customer = $this->prefix_app.'customer';

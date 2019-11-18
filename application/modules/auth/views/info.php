@@ -7,7 +7,7 @@
     <meta name="author" content="<?php echo $meta_author; ?>">
     <meta name="keywords" content="<?php echo $meta_keywords; ?>">
 
-    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>assets/themes/frontend/images/favicon.ico" />
+    <link rel="shortcut icon" href="<?php echo BASE_URL; ?>apps.min/helper/images/favicon.ico" />
 	<link href="<?php echo BASE_URL; ?>assets/themes/frontend/css/modern.css" rel="stylesheet">
     <link href="<?php echo BASE_URL; ?>assets/themes/frontend/css/site-red.css" rel="stylesheet" type="text/css">
 	
@@ -69,6 +69,9 @@
     </div>
 </div>
 
+<!-- Start of wepos Zendesk Widget script -->
+<script id="ze-snippet" src="https://static.zdassets.com/ekr/snippet.js?key=070b419f-4ff0-414d-9bee-29eb623a28b5"> </script>
+<!-- End of wepos Zendesk Widget script -->
 
 </body>
 </html>

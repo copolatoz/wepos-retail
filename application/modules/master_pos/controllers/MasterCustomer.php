@@ -17,7 +17,8 @@ class MasterCustomer extends MY_Controller {
 		//is_active_text
 		$sortAlias = array(
 			'is_active_text' => 'is_active',
-			'customer_status_text' => 'customer_status'
+			'customer_status_text' => 'customer_status',
+			'limit_kredit_show' => 'limit_kredit'
 		);		
 		
 		// Default Parameter
@@ -89,6 +90,7 @@ class MasterCustomer extends MY_Controller {
 				}
 				
 				$s['source_from'] = ucwords($s['source_from']);
+				$s['limit_kredit_show'] = priceFormat($s['limit_kredit'],0);
 				
 				array_push($newData, $s);
 			}
@@ -109,10 +111,13 @@ class MasterCustomer extends MY_Controller {
 		$customer_code = $this->input->post('customer_code');
 		$customer_contact_person = $this->input->post('customer_contact_person');
 		$customer_address = $this->input->post('customer_address');
+		$customer_city = $this->input->post('customer_city');
 		$customer_phone = $this->input->post('customer_phone');
 		$customer_email = $this->input->post('customer_email');
 		$customer_status = $this->input->post('customer_status');
 		$keterangan_blacklist = $this->input->post('keterangan_blacklist');
+		$limit_kredit = $this->input->post('limit_kredit');
+		$termin = $this->input->post('termin');
 		
 		if(empty($customer_name)){
 			$r = array('success' => false);
@@ -162,18 +167,21 @@ class MasterCustomer extends MY_Controller {
 				'fields'	=>	array(
 				    'customer_code'  	=> 	$customer_code,
 				    'customer_name'  	=> 	$customer_name,
-				    'customer_contact_person'  => 	$customer_contact_person,
+				    'customer_contact_person' => $customer_contact_person,
 				    'customer_address'  => 	$customer_address,
+				    'customer_city'  	=> 	$customer_city,
 				    'customer_phone'  	=> 	$customer_phone,
 				    'customer_email'  	=> 	$customer_email,
 				    'customer_status'  	=> 	$customer_status,
-				    'keterangan_blacklist'  	=> 	$keterangan_blacklist,
+				    'keterangan_blacklist'  => 	$keterangan_blacklist,
 				    'source_from'  	=> 	'MERCHANT',
 					'created'		=>	date('Y-m-d H:i:s'),
 					'createdby'		=>	$session_user,
 					'updated'		=>	date('Y-m-d H:i:s'),
 					'updatedby'		=>	$session_user,
-					'is_active'	=>	$is_active
+					'is_active'		=>	$is_active,
+					'limit_kredit'	=>	$limit_kredit,
+					'termin'		=>	$termin
 				),
 				'table'		=>  $this->table
 			);	
@@ -204,13 +212,16 @@ class MasterCustomer extends MY_Controller {
 				    'customer_name'  	=> 	$customer_name,
 				    'customer_contact_person'  => 	$customer_contact_person,
 				    'customer_address'  => 	$customer_address,
+				    'customer_city'  	=> 	$customer_city,
 				    'customer_phone'  	=> 	$customer_phone,
 				    'customer_email'  	=> 	$customer_email,
 				    'customer_status'  	=> 	$customer_status,
 				    'keterangan_blacklist'  	=> 	$keterangan_blacklist,
 					'updated'		=>	date('Y-m-d H:i:s'),
 					'updatedby'		=>	$session_user,
-					'is_active'		=>	$is_active
+					'is_active'		=>	$is_active,
+					'limit_kredit'	=>	$limit_kredit,
+					'termin'		=>	$termin
 				),
 				'table'			=>  $this->table,
 				'primary_key'	=>  'id'
@@ -279,7 +290,7 @@ class MasterCustomer extends MY_Controller {
 
 		$this->db->from($this->table);
 		$this->db->where("is_deleted = 0");
-		$this->db->order_by("customer_name","ASC");
+		$this->db->order_by("customer_code","ASC");
 		$get_customer = $this->db->get();
 		
 		$data_customer = array();

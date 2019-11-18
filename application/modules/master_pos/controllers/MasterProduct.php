@@ -41,8 +41,9 @@ class MasterProduct extends MY_Controller {
 		$selected_prodId = array();
 		$selected_product_code = '';
 		$selected_imei = '';
+		$use_tax_imei = 0;
 		$selected_varian = '';
-		$this->db->select('a.item_id, a.kode_unik, a.varian_name, b.product_id');
+		$this->db->select('a.item_id, a.kode_unik, a.varian_name, a.use_tax, b.product_id');
 		$this->db->from($this->prefix.'item_kode_unik as a');
 		$this->db->join($this->prefix.'product_gramasi as b',"b.item_id = a.item_id","LEFT");
 		$this->db->where("a.kode_unik = '".$searching."' AND (a.is_deleted = 0 AND a.is_active = 1) AND (a.ref_out IS NULL OR a.ref_out  = '') AND (b.is_active = 1 AND b.is_deleted = 0)");
@@ -51,6 +52,7 @@ class MasterProduct extends MY_Controller {
 			$dt_imei = $get_imei->row();
 			$selected_imei = $dt_imei->kode_unik;
 			$selected_varian = $dt_imei->varian_name;
+			$use_tax_imei = $dt_imei->use_tax;
 			
 			//$selected_product_code = $dt_imei->product_code;
 			//$searching = $dt_imei->product_code;
@@ -541,6 +543,7 @@ class MasterProduct extends MY_Controller {
 				
 				if(!empty($selected_product_code) AND $selected_product_code == $s['product_code']){
 					$s['data_stok_kode_unik'] = $selected_imei;
+					$s['use_tax'] = $use_tax_imei;
 				}
 				
 				if($allow_prod == true){

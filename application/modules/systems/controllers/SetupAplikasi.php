@@ -24,29 +24,33 @@ class SetupAplikasi extends MY_Controller {
 		$opt_val = array(
 			'wepos_tipe','timezone_default','report_place_default','warehouse_primary','retail_warehouse','spv_access_active',
 			'use_login_pin','supervisor_pin_mode','auto_logout_time','input_chinese_text','management_systems',
-			'ipserver_management_systems','view_multiple_store','autobackup_on_settlement','use_wms','as_server_backup',
+			'ipserver_management_systems','view_multiple_store','autobackup_on_settlement','use_wms','as_server_backup','mode_bazaar_tenant',
 			
-			'role_id_kasir','include_tax','include_service','default_tax_percentage','default_service_percentage',
+			'billing_no_simple','role_id_kasir','include_tax','include_service','default_tax_percentage','default_service_percentage',
 			'set_ta_table_ta','takeaway_no_tax','takeaway_no_service','diskon_sebelum_pajak_service',
 			'use_pembulatan','pembulatan_dinamis','cashier_pembulatan_keatas','cashier_max_pembulatan','autohold_create_billing','billing_log',
 			'table_available_after_paid','hide_takeaway_order_apps','default_discount_payment','save_order_note','must_choose_customer','order_timer',
 			'hide_button_invoice','hide_button_halfpayment','hide_button_mergebill','hide_button_splitbill','hide_button_logoutaplikasi',
 			'cashier_credit_ar','min_noncash','no_hold_billing','print_preview_billing','default_tipe_billing',
 			'maxday_cashier_report','jam_operasional_from','jam_operasional_to','jam_operasional_extra',
-		
+			'hide_detail_taxservice','hide_detail_takeaway','hide_detail_compliment','input_harga_manual',
+			
 			'print_order_peritem_kitchen','print_order_peritem_bar','print_order_peritem_other','print_chinese_text','show_multiple_print_qc',
 			'multiple_print_qc','show_multiple_print_billing','multiple_print_billing',
 			'printMonitoring_qc','printMonitoring_kitchen','printMonitoring_bar','printMonitoring_other','print_qc_then_order',
-			'print_qc_order_when_payment','opsi_no_print_when_payment',
+			'print_qc_order_when_payment','opsi_no_print_when_payment','tandai_pajak_billing','override_pajak_billing',
 			
 			'use_approval_po','approval_change_payment_po_done','purchasing_request_order','auto_add_supplier_item_when_purchasing','auto_add_supplier_ap','receiving_select_warehouse',
 			'stock_rekap_start_date','persediaan_barang',
 			'auto_item_code','item_code_separator','item_code_format','item_no_length','so_count_stock','ds_count_stock','ds_auto_terima','hide_empty_stock_on_report',
 			'use_item_sku','item_sku_from_code','autocut_stok_sales_to_usage','salesorder_cek_stok','using_item_average_as_hpp',
+			'auto_pengakuan_hutang','default_pengakuan_hutang',
+			'auto_pengakuan_piutang','default_pengakuan_piutang',
 			
+			'autoclosing_generate_timer','autoclosing_closing_time',
 			'closing_sales_start_date','autoclosing_generate_sales','autoclosing_closing_sales','autoclosing_auto_cancel_billing','closing_purchasing_start_date',
 			'autoclosing_generate_purchasing','autoclosing_closing_purchasing','autoclosing_auto_cancel_receiving',
-			'autoclosing_generate_timer','autoclosing_closing_time','closing_inventory_start_date','autoclosing_generate_inventory','autoclosing_generate_stock',
+			'closing_inventory_start_date','autoclosing_generate_inventory','autoclosing_generate_stock',
 			'autoclosing_closing_inventory','autoclosing_auto_cancel_distribution','autoclosing_auto_cancel_production',
 			
 			'closing_accounting_start_date','autoclosing_generate_accounting','autoclosing_closing_accounting','autoclosing_skip_open_jurnal',
@@ -98,25 +102,28 @@ class SetupAplikasi extends MY_Controller {
 		$opt_val = array(
 			'wepos_tipe','timezone_default','report_place_default','warehouse_primary','retail_warehouse','spv_access_active',
 			'use_login_pin','supervisor_pin_mode','auto_logout_time','input_chinese_text','management_systems',
-			'ipserver_management_systems','view_multiple_store','autobackup_on_settlement','use_wms','as_server_backup',
+			'ipserver_management_systems','view_multiple_store','autobackup_on_settlement','use_wms','as_server_backup','mode_bazaar_tenant',
 			
-			'role_id_kasir','include_tax','include_service','default_tax_percentage','default_service_percentage',
+			'billing_no_simple','role_id_kasir','include_tax','include_service','default_tax_percentage','default_service_percentage',
 			'set_ta_table_ta','takeaway_no_tax','takeaway_no_service','diskon_sebelum_pajak_service',
 			'use_pembulatan','pembulatan_dinamis','cashier_pembulatan_keatas','cashier_max_pembulatan','autohold_create_billing','billing_log',
 			'table_available_after_paid','hide_takeaway_order_apps','default_discount_payment','save_order_note','must_choose_customer','order_timer',
 			'hide_button_invoice','hide_button_halfpayment','hide_button_mergebill','hide_button_splitbill','hide_button_logoutaplikasi',
 			'cashier_credit_ar','min_noncash','no_hold_billing','print_preview_billing','default_tipe_billing',
 			'maxday_cashier_report','jam_operasional_from','jam_operasional_to','jam_operasional_extra',
+			'hide_detail_taxservice','hide_detail_takeaway','hide_detail_compliment','input_harga_manual',
 			
 			'print_order_peritem_kitchen','print_order_peritem_bar','print_order_peritem_other','print_chinese_text','show_multiple_print_qc',
 			'multiple_print_qc','show_multiple_print_billing','multiple_print_billing',
 			'printMonitoring_qc','printMonitoring_kitchen','printMonitoring_bar','printMonitoring_other','print_qc_then_order',
-			'print_qc_order_when_payment','opsi_no_print_when_payment',
+			'print_qc_order_when_payment','opsi_no_print_when_payment','tandai_pajak_billing','override_pajak_billing',
 			
 			'use_approval_po','approval_change_payment_po_done','purchasing_request_order','auto_add_supplier_item_when_purchasing','auto_add_supplier_ap','receiving_select_warehouse',
 			'stock_rekap_start_date','persediaan_barang',
 			'auto_item_code','item_code_separator','item_code_format','item_no_length','so_count_stock','ds_count_stock','ds_auto_terima','hide_empty_stock_on_report',
 			'use_item_sku','item_sku_from_code','autocut_stok_sales_to_usage','salesorder_cek_stok','using_item_average_as_hpp',
+			'auto_pengakuan_hutang','default_pengakuan_hutang',
+			'auto_pengakuan_piutang','default_pengakuan_piutang',
 			
 			'autoclosing_generate_timer','autoclosing_closing_time',
 			'closing_sales_start_date','autoclosing_generate_sales','autoclosing_closing_sales','autoclosing_auto_cancel_billing','closing_purchasing_start_date',
@@ -148,7 +155,9 @@ class SetupAplikasi extends MY_Controller {
 			'autobackup_on_settlement' 		=> 0,
 			'use_wms' 						=> 0,
 			'as_server_backup' 				=> 0,
+			'mode_bazaar_tenant' 			=> 0,
 			
+			'billing_no_simple'				=> 0,
 			'role_id_kasir'					=> '1,2,3',
 			'include_tax'					=> 0,
 			'include_service'				=> 0,
@@ -184,6 +193,10 @@ class SetupAplikasi extends MY_Controller {
 			'jam_operasional_from'			=> '07:00',
 			'jam_operasional_to'			=> '23:00',
 			'jam_operasional_extra'			=> 0,
+			'hide_detail_taxservice'		=> 0,
+			'hide_detail_takeaway'			=> 0,
+			'hide_detail_compliment'		=> 0,
+			'input_harga_manual'			=> 0,
 					
 			'print_order_peritem_kitchen'	=> 0,
 			'print_order_peritem_bar'		=> 0,
@@ -200,6 +213,8 @@ class SetupAplikasi extends MY_Controller {
 			'print_qc_then_order'			=> 0,
 			'print_qc_order_when_payment'	=> 0,
 			'opsi_no_print_when_payment'	=> 0,
+			'tandai_pajak_billing'			=> 0,
+			'override_pajak_billing'		=> 0,
 						
 			'use_approval_po'				=> 0,
 			'approval_change_payment_po_done' => 0,
@@ -221,6 +236,10 @@ class SetupAplikasi extends MY_Controller {
 			'item_sku_from_code'			=> 0,
 			'autocut_stok_sales_to_usage'	=> 0,
 			'using_item_average_as_hpp'		=> 0,
+			'auto_pengakuan_hutang'			=> 0,
+			'auto_pengakuan_piutang'		=> 0,
+			'default_pengakuan_hutang'		=> 0,
+			'default_pengakuan_piutang'		=> 0,
 			
 			'autoclosing_generate_timer'			=> 600000,
 			'autoclosing_closing_time'				=>'03:00',

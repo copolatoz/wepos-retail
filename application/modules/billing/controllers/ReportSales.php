@@ -32,6 +32,9 @@ class ReportSales extends MY_Controller {
 		if(empty($sorting)){
 			$sorting = 'payment_date';
 		}
+		if(empty($only_txmark)){
+			$only_txmark = 0;
+		}
 		
 		$data_post = array(
 			'do'	=> '',
@@ -42,7 +45,8 @@ class ReportSales extends MY_Controller {
 			'date_till'	=> $date_till,
 			'user_fullname'	=> $user_fullname,
 			'sorting'	=> $sorting,
-			'diskon_sebelum_pajak_service' => 0
+			'diskon_sebelum_pajak_service' => 0,
+			'only_txmark'	=> $only_txmark
 		);
 		
 		$get_opt = get_option_value(array('report_place_default','diskon_sebelum_pajak_service',
@@ -89,6 +93,10 @@ class ReportSales extends MY_Controller {
 			$this->db->where("a.billing_status", 'paid');
 			$this->db->where("a.is_deleted", 0);
 			$this->db->where($add_where);
+			
+			if(!empty($only_txmark)){
+				$this->db->where("a.txmark",1);
+			}
 			
 			if(!empty($tipe)){
 				if($tipe != 'null'){
@@ -471,6 +479,10 @@ class ReportSales extends MY_Controller {
 			$this->db->where("a.billing_status", 'paid');
 			$this->db->where("a.is_deleted", 0);
 			$this->db->where($add_where);
+			
+			if(!empty($only_txmark)){
+				$this->db->where("a.txmark",1);
+			}
 			
 			if(!empty($tipe)){
 				if($tipe != 'null'){

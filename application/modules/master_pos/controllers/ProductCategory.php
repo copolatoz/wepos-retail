@@ -16,7 +16,8 @@ class ProductCategory extends MY_Controller {
 		
 		//is_active_text
 		$sortAlias = array(
-			'is_active_text' => 'is_active'
+			'is_active_text' => 'is_active',
+			'from_item_category_text' => 'is_active'
 		);		
 		
 		// Default Parameter
@@ -25,7 +26,7 @@ class ProductCategory extends MY_Controller {
 			'primary_key'	=> 'id',
 			'table'			=> $this->table,
 			'where'			=> array('is_deleted' => 0),
-			'order'			=> array('id' => 'ASC'),
+			'order'			=> array('id' => 'DESC'),
 			'sort_alias'	=> $sortAlias,
 			'single'		=> false,
 			'output'		=> 'array' //array, object, json
@@ -60,7 +61,7 @@ class ProductCategory extends MY_Controller {
   		$newData = array();
 		
 		if(!empty($show_all_text)){
-			$dt = array('id' => '-1', 'product_category_name' => 'Pilih Semua', 'product_category_code_name' => 'Pilih Semua');
+			$dt = array('id' => '-1', 'product_category_name' => 'Semua Kategori', 'product_category_code_name' => 'Semua Kategori');
 			array_push($newData, $dt);
 		}else{
 			if(!empty($show_choose_text)){
@@ -74,6 +75,7 @@ class ProductCategory extends MY_Controller {
 				$s['product_category_code'] = strtoupper($s['product_category_code']);
 				
 				$s['is_active_text'] = ($s['is_active'] == '1') ? '<span style="color:green;">Active</span>':'<span style="color:red;">Inactive</span>';
+				$s['from_item_category_text'] = ($s['from_item_category'] > 0) ? '<span style="color:green;">Ya</span>':'<span style="color:red;">Tidak</span>';
 				$s['product_category_code_name'] = $s['product_category_code'].' - '.$s['product_category_name'];
 				
 				if(empty($s['product_category_code'])){
