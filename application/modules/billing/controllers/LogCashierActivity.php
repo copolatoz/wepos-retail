@@ -56,7 +56,7 @@ class LogCashierActivity extends MY_Controller {
 		$qdate_from = $ret_dt['qdate_from'];
 		$qdate_till = $ret_dt['qdate_till'];
 		$qdate_till_max = $ret_dt['qdate_till_max'];
-		$add_where = "(a.created >= '".$qdate_from."' AND a.created <= '".$qdate_till_max."')";
+		$add_where = "(b.payment_date >= '".$qdate_from."' AND b.payment_date <= '".$qdate_till_max."')";
 		
 		if(!empty($text_search)){
 			$add_where .= " AND (a.createdby = '".$text_search."' 

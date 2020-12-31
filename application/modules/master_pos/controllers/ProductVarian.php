@@ -60,12 +60,13 @@ class ProductVarian extends MY_Controller {
 		  		
   		$newData = array();
 		
+
 		if(!empty($show_all_text)){
 			$dt = array('id' => '-1', 'varian_name' => 'Pilih Semua');
 			array_push($newData, $dt);
 		}else{
 			if(!empty($show_choose_text)){
-				$dt = array('id' => '', 'varian_name' => 'Pilih Size/Varian');
+				$dt = array('id' => '', 'varian_name' => 'Pilih Ukuran/Varian');
 				array_push($newData, $dt);
 			}
 		}

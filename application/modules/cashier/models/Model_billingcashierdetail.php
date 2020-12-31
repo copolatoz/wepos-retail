@@ -47,6 +47,12 @@ class Model_BillingCashierDetail extends DB_Model {
 				
 				//BILLING
 				$billing_no = $dt_rowguid['billing_no'];
+				
+				$get_billno_y = substr($billing_no,0,2);
+				$get_billno_m = substr($billing_no,2,2);
+				$get_billno_d = substr($billing_no,4,2);
+				$billing_date = (2000+$get_billno_y)."-".$get_billno_m."-".$get_billno_d;
+					
 				$payment_date = strtotime($dt_rowguid['payment_date']);
 				$payment_date = date("Y-m-d", $payment_date);
 					
@@ -103,6 +109,21 @@ class Model_BillingCashierDetail extends DB_Model {
 								'qty'			=> 0
 							);
 						}
+						
+						//billing-detail-product
+						if(empty($all_detail_product[$dtRow->id])){
+							$all_detail_product[$dtRow->id] = array();
+						}
+						$all_detail_product[$dtRow->id][] = array(
+							'product_id'	=> $dtRow->product_id,
+							'from_item'		=> $dtRow->from_item,
+							'id_ref_item'	=> $dtRow->id_ref_item,
+							'unit_id'		=> $dtRow->unit_id,
+							'varian_id'		=> $dtRow->varian_id,
+							'price_hpp'		=> $dtRow->product_price_hpp,
+							'product_price'	=> $dtRow->product_price,
+							'qty'			=> $dtRow->order_qty
+						);
 						
 						$all_product_order[$key_prod_varian]['qty'] += $total_qty;
 						$all_product_order[$key_prod_varian]['price_hpp'] += ($dtRow->product_price_hpp * $total_qty);
@@ -206,6 +227,7 @@ class Model_BillingCashierDetail extends DB_Model {
 											"kode_unik" => $kode_unik,
 											"ref_out" => $billing_no,
 											"date_out" => $payment_date.' '.date("H:i:s"),
+											//"date_out" => $billing_date.' '.date("H:i:s"),
 											"storehouse_id" => $retail_warehouse
 										);
 										
@@ -218,7 +240,8 @@ class Model_BillingCashierDetail extends DB_Model {
 											//"item_id" => $dt['id_ref_item'],
 											"kode_unik" => $kode_unik,
 											"ref_out" => $billing_no,
-											"date_out" => $payment_date.' '.date("H:i:s"),
+											//"date_out" => $payment_date.' '.date("H:i:s"),
+											"date_out" => $billing_date.' '.date("H:i:s"),
 											"storehouse_id" => $retail_warehouse,
 											"item_hpp" => $dtRow->product_price_hpp,
 											"item_sales" => $dtRow->product_price,
@@ -327,6 +350,7 @@ class Model_BillingCashierDetail extends DB_Model {
 			
 			
 			//collection stock from gramasi
+			$all_product_gramasi_data = array();
 			if(!empty($all_product_gramasi)){
 				$all_product_gramasi_sql = implode(",", $all_product_gramasi);
 				$this->db->select("a.*, b.unit_id, b.item_hpp");
@@ -368,6 +392,12 @@ class Model_BillingCashierDetail extends DB_Model {
 							$all_item_usage[$dtRow['item_id']]['qty'] += $total_gramasi_qty;
 							$all_item_usage[$dtRow['item_id']]['item_hpp'] += $total_gramasi_item_hpp;
 							$all_item_usage[$dtRow['item_id']]['item_price'] += 0;
+							
+							if(empty($all_product_gramasi_data[$key_prod_varian])){
+								$all_product_gramasi_data[$key_prod_varian] = array();
+							}
+							
+							$all_product_gramasi_data[$key_prod_varian][] = $dtRow;
 							
 						}
 						
@@ -445,7 +475,8 @@ class Model_BillingCashierDetail extends DB_Model {
 					
 					$dtInsert_stock[] = array(
 						"item_id" => $item_id,
-						"trx_date" => $payment_date,
+						//"trx_date" => $payment_date,
+						"trx_date" => $billing_date,
 						"trx_type" => $billing_trx_type,
 						"trx_qty" => $billing_trx_qty,
 						"unit_id" => $dt['unit_id'],
@@ -489,7 +520,8 @@ class Model_BillingCashierDetail extends DB_Model {
 								"item_id" => $dt->item_id,
 								"kode_unik" => $dt->kode_unik,
 								"ref_in" => $billing_no,
-								"date_in" => $payment_date.' '.date("H:i:s"),
+								//"date_in" => $payment_date.' '.date("H:i:s"),
+								"date_in" => $billing_date.' '.date("H:i:s"),
 								"storehouse_id" => $retail_warehouse,
 								"item_hpp" => $get_product_price_hpp,
 								"item_sales" => $get_product_price,

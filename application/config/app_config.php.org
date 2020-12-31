@@ -3,7 +3,7 @@
 /*General Info*/
 $config['program_name']			=	'WePOS.Retail';
 $config['program_version']		=	'3.42.21';
-$config['program_release']		=	'2019';
+$config['program_release']		=	'2021';
 $config['program_name_short'] 	=	'WePOS.Retail';
 $config['copyright']			=	$config['program_name_short'].' v'.$config['program_version'].' &copy copyright '.$config['program_release'];
 $config['client_name']			=	'WePOS.Client';

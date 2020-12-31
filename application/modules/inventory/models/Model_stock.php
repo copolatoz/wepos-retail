@@ -86,29 +86,29 @@ class Model_stock extends DB_Model {
 		//$getStock
 		
 		if(empty($storehouse)){
-			$ret_data = array('info'	=> 'Warehouse unidentified!');
+			$ret_data = array('info'	=> 'Warehouse Tidak dikenali!');
 			return $ret_data;
 		}
 		
 		if(empty($storehouse_item)){
-			$ret_data = array('info'	=> 'Detail unidentified!');
+			$ret_data = array('info'	=> 'Detail Tidak dikenali!');
 			return $ret_data;
 		}
 		
 		if(empty($storehouse_item_qty)){
-			$ret_data = array('info'	=> 'Detail Qty unidentified!');
+			$ret_data = array('info'	=> 'Detail Qty Tidak dikenali!');
 			return $ret_data;
 		}
 		
 		//storehouse_item_qty_before --> edit
 		
 		if(empty($getStock)){
-			$ret_data = array('info'	=> 'Data Stock unidentified!');
+			$ret_data = array('info'	=> 'Data Stock Tidak dikenali!');
 			return $ret_data;
 		}
 		
 		if(empty($tipe)){
-			$ret_data = array('info'	=> 'Tipe check stock unidentified!');
+			$ret_data = array('info'	=> 'Tipe check stock Tidak dikenali!');
 			return $ret_data;
 		}
 		

@@ -491,7 +491,7 @@ class PurchaseOrder extends MY_Controller {
 				
 				//generate id
 				$s['id'] = 'new-'.$id_user.'-'.$s['id'].'-'.($mktime_now+$no);
-				$s['temp_id'] = 'new-'.$id_user.'-'.$s['po_detail_id'];
+				$s['temp_id'] = 'new-'.$id_user.'-'.$s['po_id'].'-'.$s['po_detail_id'];
 				$s['receive_det_purchase'] = $s['receive_det_purchase'];
 				$s['receive_det_purchase_show'] = 'Rp '.priceFormat($s['receive_det_purchase']);
 				$s['po_detail_qty_sisa'] = $s['po_detail_qty'] - $s['po_receive_qty'];

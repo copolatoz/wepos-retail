@@ -3,8 +3,7 @@ class DataBilling extends MY_Controller {
 	
 	public $table;
 		
-	function __construct()
-	{
+	function __construct(){
 		parent::__construct();
 		$this->prefix_apps = config_item('db_prefix');
 		$this->prefix = config_item('db_prefix2');
@@ -12,8 +11,7 @@ class DataBilling extends MY_Controller {
 		$this->load->model('model_billingdetail', 'm2');
 	}
 
-	public function gridData()
-	{
+	public function gridData(){
 		$this->table = $this->prefix.'billing';
 		$this->table2 = $this->prefix.'billing_detail';		
 		$session_user = $this->session->userdata('user_username');	
@@ -26,14 +24,20 @@ class DataBilling extends MY_Controller {
 			'payment_id_cash',
 			'payment_id_debit',
 			'payment_id_credit',
-			'wepos_tipe',
-			'jam_operasional_from','jam_operasional_to','jam_operasional_extra'
+			'jam_operasional_from','jam_operasional_to','jam_operasional_extra',
+			'hide_hold_bill_yesterday',
+			'nontrx_override_on'
 		);
 		$get_opt = get_option_value($opt_value);
 		
-		$wepos_tipe = 'cafe';
-		if(!empty($get_opt['wepos_tipe'])){
-			$wepos_tipe = $get_opt['wepos_tipe'];
+		$hide_hold_bill_yesterday = 0;
+		if(!empty($get_opt['hide_hold_bill_yesterday'])){
+			$hide_hold_bill_yesterday = $get_opt['hide_hold_bill_yesterday'];
+		}
+		
+		$nontrx_override_on = 0;
+		if(!empty($get_opt['nontrx_override_on'])){
+			$nontrx_override_on = $get_opt['nontrx_override_on'];
 		}
 		
 		$no_midnight = 0;
@@ -46,8 +50,13 @@ class DataBilling extends MY_Controller {
 			'is_active_text' => 'a.is_active',
 			'billing_date' => 'a.created',
 			'updated_date' => 'a.updated',
+			'updated_time' => 'a.updated',
+			'payment_time' => 'a.payment_date',
 			'table_no' => 'a.table_no',
 			'billing_no_show' => 'a.billing_no',
+			'txmark_no_show' => 'a.txmark_no',
+			'tax_total_show' => 'a.tax_total',
+			'payment_note2' => 'a.payment_type_name',
 			'updatedby' => 'a.updatedby'
 		);		
 		
@@ -107,6 +116,11 @@ class DataBilling extends MY_Controller {
 		$use_range_date = $this->input->post('use_range_date');
 		$by_product_order = $this->input->post('by_product_order');
 		$txmark_only = $this->input->post('txmark_only');
+		
+		//update-2001.002
+		$table_id = $this->input->post('table_id');
+		//$use_range_date = 0;
+		
 		if(!empty($keywords)){
 			$searching = $keywords;
 		}
@@ -123,131 +137,9 @@ class DataBilling extends MY_Controller {
 		if(!empty($txmark_only)){
 			$params['where'][] = "(a.txmark = 1)";
 		}
-		
-		if(!empty($shift_billing)){
-			$skip_date = true;
-			
-			if(empty($date_from)){
-				$date_from = date('Y-m-d');
-			}
-			
-			if(!empty($date_from)){
-			
-				if(empty($date_from)){ $date_from = date('Y-m-d'); }
-				
-				$mktime_dari = strtotime($date_from);
-							
-				//$date_from = date("Y-m-d",strtotime($date_from));		
-			}
-			
-			$qdate_from_plus1 = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
-			
-			//jam_operasional
-			$mktime_dari = strtotime($date_from);
-			$mktime_sampai = strtotime($date_from);
-			$ret_dt = check_report_jam_operasional($get_opt, $mktime_dari, $mktime_sampai);
-			$qdate_from = $ret_dt['qdate_from'];
-			$qdate_from_plus1_max = $ret_dt['qdate_till_max'];
-			
-			//get shift range
-			$this->db->from($this->prefix.'open_close_shift');
-			$this->db->where("user_shift",$shift_billing);
-			$this->db->where("(tanggal_shift = '".$date_from."' OR (tipe_shift = 'close' AND tanggal_shift = '".$qdate_from_plus1."' 
-				AND created <= '".$qdate_from_plus1_max."'))");
-			$get_shift = $this->db->get();
-			
-			if($get_shift->num_rows() > 0){
-				
-				$data_shift = array();
-				foreach($get_shift->result() as $dtS){
-					if(empty($data_shift[$dtS->user_shift])){
-						$data_shift[$dtS->user_shift] = array(
-							'jam_from' => '',
-							'jam_till' => ''
-						);
-					}
-					
-					if($dtS->tipe_shift == 'open'){
-						$data_shift[$dtS->user_shift]['jam_from'] = $dtS->jam_shift;
-					}
-					
-					if($dtS->tipe_shift == 'close'){
-						$data_shift[$dtS->user_shift]['jam_till'] = $dtS->jam_shift;
-					}
-					
-				}
-				
-				if(!empty($data_shift[$shift_billing])){
-					//FROM
-					if(empty($data_shift[$shift_billing]['jam_from'])){
-						if($shift_billing == 1){
-							$data_shift[$shift_billing]['jam_from'] = '00:00'; //default
-						}
-						
-						if($shift_billing == 2){
-							$data_shift[$shift_billing]['jam_from'] = '00:00:00'; //default
-							if(!empty($data_shift[1]['jam_till'])){
-								//take from shift 1
-								$data_shift[$shift_billing]['jam_from'] = $data_shift[1]['jam_till'].':59';
-							}
-						}
-					}else{
-						$data_shift[$shift_billing]['jam_from'] .= ':00';
-					}
-					
-					//TILL
-					if(empty($data_shift[$shift_billing]['jam_till'])){
-						if($shift_billing == 1){
-							$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
-							if(!empty($data_shift[2]['jam_from'])){
-								//take from shift 2
-								$data_shift[$shift_billing]['jam_till'] = $data_shift[1]['jam_from'].':00';
-							}
-						}
-						
-						if($shift_billing == 2){
-							$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
-						}
-						
-					}else{
-						$data_shift[$shift_billing]['jam_till'] .= ':00';
-					}
-						
-					//$qdate_till_max = date("Y-m-d", strtotime($date_from)+ONE_DAY_UNIX);
-					if($shift_billing == 1){
-						$qdate_till_max = date("Y-m-d",strtotime($date_from));
-					}else
-					if($shift_billing == 2){
-						$jam_shift = (int)substr($data_shift[$shift_billing]['jam_till'],0,2);
-						if(strlen($jam_shift) == 1){
-							//asumsi pagi
-							$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
-						}else{
-							$qdate_till_max = date("Y-m-d",strtotime($date_from));
-						}
-					}else{
-						//all shift
-						
-					}
-					
-					$params['where'][] = "(a.payment_date >= '".$date_from." ".$data_shift[$shift_billing]['jam_from']."' AND a.payment_date <= '".$qdate_till_max." ".$data_shift[$shift_billing]['jam_till']."')";
-					
-					/*$params['where'][] = "(DATE_FORMAT(a.payment_date, '%Y-%m-%d') = '".$date_from."') 
-					AND (DATE_FORMAT(a.payment_date, '%H:%i:%s') BETWEEN '".$data_shift[$shift_billing]['jam_from']."' AND '".$data_shift[$shift_billing]['jam_till']."')";*/
-				}
-			}else{
-			
-				//$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
-				//$params['where'][] = "(a.payment_date >= '".$date_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
-				
-				$qdate_from = $ret_dt['qdate_from'];
-				$qdate_till_max = $ret_dt['qdate_till_max'];
-				$params['where'][] = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
-			}
+		if(!empty($table_id)){
+			$params['where'][] = "(a.table_id = ".$table_id.")";
 		}
-		
-		//echo $where_shift_billing;
-		
 		if(!empty($report_paid_order)){
 			$params['order'] = array('a.id' => $report_paid_order);
 		}
@@ -259,7 +151,7 @@ class DataBilling extends MY_Controller {
 			if(!empty($by_product_order)){
 				
 			}else{
-				$params['where'][] = "(a.billing_no LIKE '%".$searching."%' OR a.billing_no LIKE '%".$searching."%')";
+				$params['where'][] = "(a.billing_no LIKE '%".$searching."%')";
 			}
 			
 		}
@@ -278,14 +170,20 @@ class DataBilling extends MY_Controller {
 				$params['where'][] = "(a.merge_id IS NULL OR a.merge_id = 0)";
 			}
 			
+			//update-2007.001
+			if($nontrx_override_on == 1 AND $billing_status == 'paid'){
+				$params['where'][] = "(a.txmark = 1)";
+			}
+			
 		}else{
 			$params['where'][] = "(a.billing_status = '-')";
 		}
 		
-		
+		//update-2002.001
 		if(isset($_POST['use_range_date'])){
-			$skip_date = false;
-			if(empty($use_range_date)){
+			if(!empty($use_range_date)){
+				$skip_date = false;
+			}else{
 				$skip_date = true;
 			}
 		}
@@ -294,25 +192,96 @@ class DataBilling extends MY_Controller {
 		
 		}else{
 		
+			//update-2001.002
+			$use_datenow = false;
 			if(empty($date_from)){
-				$date_from = date('Y-m-d');
+				$date_from = date('d-m-Y H:i:s');
+				$use_datenow = true;
 			}
 			
 			if(!empty($date_from)){
 			
-				if(empty($date_from)){ $date_from = date('Y-m-d'); }
+				$mktime_dari = strtotime($date_from);
+				
+				//update-2001.002
+				if($use_datenow == true){
+					
+					$billing_time = date('G');
+					$datenowstr = strtotime(date("d-m-Y H:i:s"));
+					$datenowstr0 = strtotime(date("d-m-Y 00:00:00"));
+					
+					$jam_operasional_from = 7;
+					$jam_operasional_from_Hi = '07:00';
+					if(!empty($get_opt['jam_operasional_from'])){
+						$jm_opr_mktime = strtotime(date("d-m-Y")." ".$get_opt['jam_operasional_from']);
+						$jam_operasional_from = date('G',$jm_opr_mktime);
+						$jam_operasional_from_Hi = date('H:i',$jm_opr_mktime);
+					}
+					
+					$jam_operasional_to = 23;
+					$jam_operasional_to_Hi = '23:00';
+					if(!empty($get_opt['jam_operasional_to'])){
+						if($get_opt['jam_operasional_to'] == '24:00'){
+							$get_opt['jam_operasional_to'] = '23:59:59';
+						}
+						$jm_opr_mktime = strtotime(date("d-m-Y")." ".$get_opt['jam_operasional_to']);
+						$jam_operasional_to = date('G',$jm_opr_mktime);
+						$jam_operasional_to_Hi = date('H:i',$jm_opr_mktime);
+					}
+					
+					$jam_operasional_extra = 0;
+					if(!empty($get_opt['jam_operasional_extra'])){
+						$jam_operasional_extra = $get_opt['jam_operasional_extra'];
+					}
+					
+					if($billing_time < $jam_operasional_from){
+						//extra / early??
+			
+						//check extra
+						$datenowstrmin1 = $datenowstr0-ONE_DAY_UNIX;
+						$datenowstr_oprfrom = strtotime(date("d-m-Y", $datenowstrmin1)." ".$jam_operasional_from_Hi.":00");
+						$datenowstr_oprto_org = strtotime(date("d-m-Y", $datenowstrmin1)." ".$jam_operasional_to_Hi.":00");
+						$datenowstr_oprto = strtotime(date("d-m-Y", $datenowstrmin1)." ".$jam_operasional_to_Hi.":00");
+						//add extra
+						if(!empty($jam_operasional_extra)){
+							$datenowstr_oprto += ($jam_operasional_extra*3600);
+						}
+						
+						if($datenowstr < $datenowstr_oprto){
+							$date_from = date('d-m-Y H:i:s', $datenowstr_oprfrom);
+							$date_till = date('d-m-Y H:i:s', $datenowstr_oprto);
+						}else{
+							$date_from = date('d-m-Y H:i:s', $datenowstr_oprfrom+ONE_DAY_UNIX);
+							$date_till = date('d-m-Y H:i:s', $datenowstr_oprto+ONE_DAY_UNIX);
+						}
+						
+					}else{
+			
+						$datenowstr_oprfrom = strtotime(date("d-m-Y", $datenowstr0)." ".$jam_operasional_from_Hi.":00");
+						$datenowstr_oprto_org = strtotime(date("d-m-Y", $datenowstr0)." ".$jam_operasional_to_Hi.":00");
+						$datenowstr_oprto = strtotime(date("d-m-Y", $datenowstr0)." ".$jam_operasional_to_Hi.":00");
+						//add extra
+						if(!empty($jam_operasional_extra)){
+							$datenowstr_oprto += ($jam_operasional_extra*3600);
+						}
+						
+						if($datenowstr < $datenowstr_oprto){
+							$date_from = date('d-m-Y H:i:s', $datenowstr_oprfrom);
+							$date_till = date('d-m-Y H:i:s', $datenowstr_oprto);
+						}
+						
+					}
+				}
 				
 				$mktime_dari = strtotime($date_from);
-							
-				$qdate_from = date("Y-m-d",strtotime($date_from));
-				$qdate_till = date("Y-m-d",strtotime($date_from));
+				$qdate_from = date("Y-m-d H:i:s",strtotime($date_from));
 				
 				//if($billing_status == 'paid' || $billing_status == 'cancel'){
-					if(empty($date_till)){ $date_till = date('Y-m-d'); }
-					$qdate_till = date("Y-m-d",strtotime($date_till));
+					if(empty($date_till)){ $date_till = date('d-m-Y H:i:s'); }
+					$qdate_till = date("Y-m-d H:i:s",strtotime($date_till));
 				//}
 				
-				$qdate_till_max = date("Y-m-d",strtotime($qdate_till)+ONE_DAY_UNIX);
+				$qdate_till_max = date("Y-m-d H:i:s",strtotime($qdate_till)+ONE_DAY_UNIX);
 				
 				//jam_operasional
 				$mktime_dari = strtotime($date_from);
@@ -322,9 +291,11 @@ class DataBilling extends MY_Controller {
 				$qdate_till = $ret_dt['qdate_till'];
 				$qdate_till_max = $ret_dt['qdate_till_max'];
 				
+				//update-2003.001
+				$qdate_from_mk = strtotime($qdate_from);
 				
 				if(!empty($use_payment_date)){
-					//00:00:00
+					//07:00:00
 					//$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
 					$params['where'][] = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 				}else{
@@ -333,27 +304,38 @@ class DataBilling extends MY_Controller {
 					if($billing_status == 'hold' OR $billing_status == 'paid'){						
 						
 						if($billing_status == 'paid'){
-							$qdate_from = date("Y-m-d",strtotime($qdate_from));
+							$qdate_from = date("Y-m-d H:i:s",strtotime($qdate_from));
 						}else{
-							$qdate_from = date("Y-m-d",strtotime($qdate_from)-ONE_DAY_UNIX);
+							$qdate_from = date("Y-m-d H:i:s",strtotime($qdate_from)-ONE_DAY_UNIX);
+							
+							//update-2002.001
+							//$qdate_till_max = date("Y-m-d H:i:s",strtotime($qdate_till_max)-ONE_DAY_UNIX);
+							$qdate_till_max = date("Y-m-d H:i:s",strtotime($qdate_till_max));
 						}
 					}
 					
 					if($no_midnight == 1){
-						$qdate_from = date("Y-m-d",strtotime($date_from));
+						$qdate_from = date("Y-m-d H:i:s",strtotime($qdate_from));
 					}
 				
 					if($billing_status == 'paid'){
-						//$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+						//$params['where'][] = "(a.payment_date >= '".$qdate_from." 00:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
 						$params['where'][] = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
 					}else{
-						//$params['where'][] = "(a.updated >= '".$qdate_from." 00:00:00' AND a.updated <= '".$qdate_till_max." 23:59:59')";
+						//$params['where'][] = "(a.updated >= '".$qdate_from." 00:00:01' AND a.updated <= '".$qdate_till_max." 06:00:00')";
 						$params['where'][] = "(a.updated >= '".$qdate_from."' AND a.updated <= '".$qdate_till_max."')";
 					}
 					
 					
 				}
-						
+				
+				//update-2003.001
+				if(empty($searching)){
+					if(!empty($hide_hold_bill_yesterday)){
+						$lastest_billing_no = date("ymd", $qdate_from_mk).'0000';
+						$params['where'][] = "(a.billing_no >= '".$lastest_billing_no."')";
+					}				
+				}						
 			}
 		}
 		
@@ -425,6 +407,7 @@ class DataBilling extends MY_Controller {
 			foreach ($get_data['data'] as $s){
 				$s['is_active_text'] = ($s['is_active'] == '1') ? '<span style="color:green;">Active</span>':'<span style="color:red;">Inactive</span>';
 				$s['item_no'] = $no;
+				$s['payment_time'] = date("H:i",strtotime($s['payment_date']));
 				$s['payment_date'] = date("d-m-Y H:i",strtotime($s['payment_date']));
 				$s['billing_date'] = date("d-m-Y H:i",strtotime($s['created']));
 				
@@ -437,6 +420,7 @@ class DataBilling extends MY_Controller {
 				$s['created_datetime'] = date("d.m.Y H:i",strtotime($s['created']));
 				
 				$s['created_date'] = date("d-m-Y H:i",strtotime($s['created']));
+				$s['updated_time'] = date("H:i",strtotime($s['updated']));
 				$s['updated_date'] = date("d-m-Y H:i",strtotime($s['updated']));
 				
 				if(!in_array($s['id'], $all_bil_id)){
@@ -615,6 +599,40 @@ class DataBilling extends MY_Controller {
 					$s['txmark_no_show'] = '<span style="color:green;font-weight:bold;">'.$s['txmark_no'].'</span>';
 				}
 				
+				//update-2001.002
+				$s['table_button'] = 0;
+				$s['billing_info'] = '';
+				$s['billing_color'] = '0bab00';
+				if(!empty($table_id) AND !empty($billing_status)){
+					
+					if($no == 1){
+						$backup_id = $s['id'];
+						$s['id'] = 0;
+						
+						$s['billing_info'] = '<div style="font-size:12px; margin:5px 0px 5px;">Tipe yg dipilih:</div>';
+						$s['billing_info'] .= '<div style="font-size:22px; margin:15px 0px 20px;"><b>'.$s['table_no'].'</b></div>';
+						$s['billing_info'] .= '<div style="font-size:10px;">Klik u/ lihat Tipe Lainnya</div>';
+						
+						$s['billing_color'] = '008abf';
+						$s['table_button'] = 1;
+						array_push($newData, $s);
+						
+						$s['billing_color'] = '0bab00';
+						$s['table_button'] = 0;
+						$s['id'] = $backup_id;
+					}
+					
+					if(empty($s['qc_notes'])){
+						$s['qc_notes'] = '-';
+					}
+					
+					$s['billing_info'] = '<div style="font-size:12px; margin:5px 0px 5px; line-height:14px;"><b>No.'.$s['billing_no'].'</b></div>';
+					$s['billing_info'] .= '<div style="font-size:14px; margin:10px 0px 20px; line-height:18px;"><b>Rp. '.$s['grand_total_show'].'</b></div>';
+					$s['billing_info'] .= '<div style="font-size:12px; margin:0px 0px 5px; line-height:14px;"><b>'.$s['qc_notes'].'</b></div>';
+					$s['billing_info'] .= '<div style="font-size:10px; margin:0px 0px 0px; line-height: 14px;">Tamu: '.$s['total_guest'].' Orang</div>';
+					
+				}
+				
 				$newData[$s['id']] = $s;
 				//array_push($newData, $s);
 				
@@ -658,6 +676,9 @@ class DataBilling extends MY_Controller {
 				$newData[$detail->billing_id]['order_total_show'] = 'Rp '.priceFormat($newData[$detail->billing_id]['order_total']);
 								
 				$total_qty_order = ($newData[$detail->billing_id]['total_qty_deliver']+$newData[$detail->billing_id]['total_qty_order']);
+				if(empty($total_qty_order)){
+					$total_qty_order = 1;
+				}
 				$percent_status_order = ($newData[$detail->billing_id]['total_qty_deliver'] / $total_qty_order) * 100;
 				$newData[$detail->billing_id]['percent_status_order'] = $percent_status_order;
 				
@@ -682,8 +703,7 @@ class DataBilling extends MY_Controller {
       	die(json_encode($get_data));
 	}
 
-	public function gridData_billingDetail()
-	{
+	public function gridData_billingDetail(){
 		$this->table = $this->prefix.'billing';
 		$this->table2 = $this->prefix.'billing_detail';
 		$this->product_img_url = RESOURCES_URL.'product/thumb/';
@@ -709,9 +729,10 @@ class DataBilling extends MY_Controller {
 								a.is_promo, a.promo_id, a.promo_tipe, a.promo_percentage, a.promo_price, a.promo_desc,
 								a.is_buyget, a.buyget_id, a.buyget_tipe, a.buyget_desc, a.buyget_qty, a.buyget_percentage, a.buyget_total,
 								a.buyget_item, a.free_item, a.package_item, a.ref_order_id, a.use_stok_kode_unik, a.data_stok_kode_unik, a.product_price_real,
-								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil,
+								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil, 
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, 
+								b.product_code, b.has_list_price",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -723,7 +744,9 @@ class DataBilling extends MY_Controller {
 										array($this->prefix.'items as e','e.id = b.id_ref_item','LEFT')
 									) 
 								),
-			'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
+			//update-2010.001
+			//'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
+			'where'			=> array("a.order_qty != 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
 			'order'			=> array('a.id' => 'ASC'),
 			'sort_alias'	=> $sortAlias,
 			'single'		=> false,
@@ -798,7 +821,14 @@ class DataBilling extends MY_Controller {
 				//$s['product_detail_info'] .= $additional_text.'<br/>X @ Rp.'.priceFormat($s['product_price']);	
 				
 				$s['product_name_show'] = $s['product_name'];
-				$s['product_detail_info'] .= $additional_text.'<br/>X @ Rp.'.priceFormat($s['product_price']);	
+				
+				//update-2001.002
+				if(!empty($s['include_tax']) OR !empty($s['include_service'])){
+					$s['product_detail_info'] .= $additional_text.'<br/>X @ Rp.'.priceFormat($s['product_price_real']);		
+				}else{
+					$s['product_detail_info'] .= $additional_text.'<br/>X @ Rp.'.priceFormat($s['product_price']);	
+				}
+				
 					
 				//PROMO UPDATE
 				if($s['is_promo'] == 1){
@@ -859,6 +889,8 @@ class DataBilling extends MY_Controller {
 					$s['order_total'] = 0;
 					$s['product_price'] = 0;
 					$s['product_price_real'] = 0;
+					$s['tax_total'] = 0;
+					$s['service_total'] = 0;
 				}
 				
 
@@ -1091,7 +1123,6 @@ class DataBilling extends MY_Controller {
 				//$qdate_till = date("Y-m-d 23:59:59",strtotime($date_till));
 				//$qdate_from_plus1 = date("Y-m-d",strtotime($qdate_till)+ONE_DAY_UNIX);
 				//$params['where'][] = "(b.payment_date >= '".$qdate_from."' AND b.payment_date <= '".$qdate_till."')";
-						
 				$qdate_from = $ret_dt['qdate_from'];
 				$qdate_till = $ret_dt['qdate_till'];
 				$qdate_till_max = $ret_dt['qdate_till_max'];
@@ -1280,8 +1311,7 @@ class DataBilling extends MY_Controller {
       	die(json_encode($get_data));
 	}
 	
-	public function gridData_billingDetail_split()
-	{
+	public function gridData_billingDetail_split(){
 		$this->table = $this->prefix.'billing';
 		$this->table2 = $this->prefix.'billing_detail_split';
 		$this->product_img_url = RESOURCES_URL.'product/thumb/';
@@ -1306,9 +1336,10 @@ class DataBilling extends MY_Controller {
 								a.order_status, a.order_notes, a.is_active, a.retur_type, a.retur_qty, a.retur_reason,
 								a.is_promo, a.promo_id, a.promo_tipe, a.promo_percentage, a.promo_price, a.promo_desc,
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil, 
-								a.buyget_item, a.free_item, a.ref_order_id,
+								a.buyget_item, a.free_item, a.ref_order_id, a.is_buyget,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, 
+								b.product_code, b.has_list_price",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -1320,7 +1351,9 @@ class DataBilling extends MY_Controller {
 										array($this->prefix.'items as e','e.id = b.id_ref_item','LEFT')
 									) 
 								),
-			'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
+			//update-2010.001
+			//'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
+			'where'			=> array('a.is_deleted' => 0, 'a.billing_id' => $billing_id),
 			'order'			=> array('a.id' => 'ASC'),
 			'sort_alias'	=> $sortAlias,
 			'single'		=> false,
@@ -1337,6 +1370,7 @@ class DataBilling extends MY_Controller {
 		if(!empty($searching)){
 			$params['where'][] = "(a.product_name  LIKE '%".$searching."%' OR a.product_name LIKE '%".$searching."%')";
 		}
+		$params['where'][] = "(a.ref_order_id = 0)";
 		
 		//get data -> data, totalCount
 		$get_data = $this->m->find_all($params);
@@ -1489,8 +1523,7 @@ class DataBilling extends MY_Controller {
 	}
 	
 	//DISCOUNT
-	public function gridData_billingDetail_discount()
-	{
+	public function gridData_billingDetail_discount(){
 		$this->table = $this->prefix.'billing';
 		$this->table2 = $this->prefix.'billing_detail';
 		$this->table_discount = $this->prefix.'discount';
@@ -1522,7 +1555,8 @@ class DataBilling extends MY_Controller {
 								a.buyget_item, a.free_item, a.ref_order_id, a.use_stok_kode_unik, a.data_stok_kode_unik,
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, 
+								b.product_code, b.has_list_price",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -1551,6 +1585,7 @@ class DataBilling extends MY_Controller {
 		if(!empty($searching)){
 			$params['where'][] = "(a.product_name  LIKE '%".$searching."%' OR a.product_name LIKE '%".$searching."%')";
 		}
+		$params['where'][] = "(a.ref_order_id = 0)";
 		
 		//get data -> data, totalCount
 		$get_data = $this->m->find_all($params);
@@ -1951,8 +1986,7 @@ class DataBilling extends MY_Controller {
 	}
 	
 	//Compliment
-	public function gridData_billingDetail_compliment()
-	{
+	public function gridData_billingDetail_compliment(){
 		$this->table = $this->prefix.'billing';
 		$this->table2 = $this->prefix.'billing_detail';
 		$this->table_discount = $this->prefix.'discount';
@@ -1984,7 +2018,8 @@ class DataBilling extends MY_Controller {
 								a.buyget_item, a.free_item, a.ref_order_id, a.use_stok_kode_unik, a.data_stok_kode_unik,
 								a.is_kerjasama, a.supplier_id, a.persentase_bagi_hasil, a.total_bagi_hasil,
 								b.product_name, b.product_chinese_name, b.has_varian, b.product_desc, b.product_type, b.product_image, 
-								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, b.product_code",
+								b.category_id, b.product_group, b.use_tax, b.use_service, c.product_category_name, d.varian_name, e.item_code, 
+								b.product_code, b.has_list_price",
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table2.' as a',
 			'join'			=> array(
@@ -1996,7 +2031,9 @@ class DataBilling extends MY_Controller {
 										array($this->prefix.'items as e','e.id = b.id_ref_item','LEFT')
 									) 
 								),
-			'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
+			//update-2010.001
+			//'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
+			'where'			=> array("a.order_qty != 0", 'a.is_deleted' => 0, 'a.billing_id' => $billing_id),
 			'order'			=> array('a.id' => 'ASC'),
 			'sort_alias'	=> $sortAlias,
 			'single'		=> false,
@@ -2013,6 +2050,7 @@ class DataBilling extends MY_Controller {
 		if(!empty($searching)){
 			$params['where'][] = "(a.product_name  LIKE '%".$searching."%' OR a.product_name LIKE '%".$searching."%')";
 		}
+		$params['where'][] = "(a.ref_order_id = 0)";
 		
 		//get data -> data, totalCount
 		$get_data = $this->m->find_all($params);
@@ -2430,8 +2468,11 @@ class DataBilling extends MY_Controller {
 										array($this->prefix.'items as e','e.id = b.id_ref_item','LEFT')
 									) 
 								),
-			'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $id),
+			//update-2010.001					
+			//'where'			=> array("a.order_qty > 0", 'a.is_deleted' => 0, 'a.billing_id' => $id),
+			'where'			=> array("a.order_qty != 0", 'a.is_deleted' => 0, 'a.billing_id' => $id),
 			'order'			=> array('a.id' => 'ASC'),
+			'limit'			=> 99999,
 			'sort_alias'	=> $sortAlias,
 			'single'		=> false,
 			'output'		=> 'array' //array, object, json
@@ -2488,9 +2529,7 @@ class DataBilling extends MY_Controller {
 					}
 				}
 				
-				//$s['product_detail_info'] .= $additional_text.'<br/>X @ Rp.'.priceFormat($s['product_price']);				
-				
-				
+				//$s['product_detail_info'] .= $additional_text.'<br/>X @ Rp.'.priceFormat($s['product_price']);
 				//PROMO UPDATE
 				if($s['is_promo'] == 1){
 					
@@ -2505,8 +2544,6 @@ class DataBilling extends MY_Controller {
 					$s['product_name_show'] = $s['product_name'].' <font color="orange">Promo</font>';
 					$s['product_price_show'] = 'Rp <strike>'.priceFormat($s['product_normal_price_promo']).'</strike> <font color="orange">'.$s['promo_price_show'].'</font>';
 					$s['product_detail_info'] = $s['product_name'].$additional_text.' <font color="orange">Promo</font><br/>X @ Rp.'.priceFormat($s['product_price']);
-					
-
 				}
 						
 				//BUY AND GET
@@ -2563,9 +2600,9 @@ class DataBilling extends MY_Controller {
 					$s['discount_total'] = 0;
 				}
 				
-				$s['tax_total_show'] = priceFormat($s['tax_total']);
-				$s['service_total_show'] = priceFormat($s['service_total']);
-				$s['discount_total_show'] = priceFormat($s['discount_total']);
+				$s['tax_total_show'] = 'Rp. '.priceFormat($s['tax_total']);
+				$s['service_total_show'] = 'Rp. '.priceFormat($s['service_total']);
+				$s['discount_total_show'] = 'Rp. '.priceFormat($s['discount_total']);
 				
 				if($s['is_takeaway'] == '1'){
 					$s['is_takeaway_text'] = '<span style="color:green;">Yes</span>';
@@ -2603,6 +2640,9 @@ class DataBilling extends MY_Controller {
 				}
 				
 				$s['hide_compliment_order'] = $hide_compliment_order;
+				
+				$s['sub_total'] = $s['order_total'] + ($s['tax_total']+$s['service_total']) - $s['discount_total'];
+				$s['sub_total_show'] = priceFormat($s['sub_total']);
 				
 				$no++;
 				array_push($newData, $s);

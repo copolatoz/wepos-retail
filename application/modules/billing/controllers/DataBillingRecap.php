@@ -19,7 +19,7 @@ class DataBillingRecap extends MY_Controller {
 		$session_user = $this->session->userdata('user_username');	
 		$role_id = $this->session->userdata('role_id');	
 		
-		//is_active_text
+		//default date 07 s/d 06 (H+1)
 		$sortAlias = array(
 			'is_active_text' => 'a.is_active',
 			'billing_date' => 'a.created',
@@ -90,7 +90,7 @@ class DataBillingRecap extends MY_Controller {
 				
 				$mktime_dari = strtotime($date_from);
 							
-				$date_from = date("Y-m-d",strtotime($date_from));		
+				//$date_from = date("Y-m-d",strtotime($date_from));		
 			}
 			
 			$qdate_from_plus1 = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
@@ -134,11 +134,11 @@ class DataBillingRecap extends MY_Controller {
 					//FROM
 					if(empty($data_shift[$shift_billing]['jam_from'])){
 						if($shift_billing == 1){
-							$data_shift[$shift_billing]['jam_from'] = '00:00'; //default
+							$data_shift[$shift_billing]['jam_from'] = '07:00'; //default
 						}
 						
 						if($shift_billing == 2){
-							$data_shift[$shift_billing]['jam_from'] = '00:00:00'; //default
+							$data_shift[$shift_billing]['jam_from'] = '07:00:00'; //default
 							if(!empty($data_shift[1]['jam_till'])){
 								//take from shift 1
 								$data_shift[$shift_billing]['jam_from'] = $data_shift[1]['jam_till'].':59';
@@ -151,7 +151,7 @@ class DataBillingRecap extends MY_Controller {
 					//TILL
 					if(empty($data_shift[$shift_billing]['jam_till'])){
 						if($shift_billing == 1){
-							$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
+							$data_shift[$shift_billing]['jam_till'] = '06:00:00'; //default
 							if(!empty($data_shift[2]['jam_from'])){
 								//take from shift 2
 								$data_shift[$shift_billing]['jam_till'] = $data_shift[1]['jam_from'].':00';
@@ -159,7 +159,7 @@ class DataBillingRecap extends MY_Controller {
 						}
 						
 						if($shift_billing == 2){
-							$data_shift[$shift_billing]['jam_till'] = '23:59:59'; //default
+							$data_shift[$shift_billing]['jam_till'] = '06:00:00'; //default
 						}
 						
 					}else{
@@ -189,11 +189,12 @@ class DataBillingRecap extends MY_Controller {
 			}else{
 			
 				//$qdate_till_max = date("Y-m-d",strtotime($date_from)+ONE_DAY_UNIX);
-				//$params['where'][] = "(a.payment_date >= '".$date_from." 00:00:00' AND a.payment_date <= '".$qdate_till_max." 23:59:59')";
+				//$params['where'][] = "(a.payment_date >= '".$date_from." 07:00:01' AND a.payment_date <= '".$qdate_till_max." 06:00:00')";
 				
 				$qdate_from = $ret_dt['qdate_from'];
 				$qdate_till_max = $ret_dt['qdate_till_max'];
 				$params['where'][] = "(a.payment_date >= '".$qdate_from."' AND a.payment_date <= '".$qdate_till_max."')";
+				
 			}
 		}
 		
@@ -228,7 +229,7 @@ class DataBillingRecap extends MY_Controller {
 				
 				$mktime_dari = strtotime($date_from);
 				$mktime_sampai = strtotime($date_till);
-							
+				
 				$ret_dt = check_report_jam_operasional(array(), $mktime_dari, $mktime_sampai);
 						
 				//$qdate_from = date("Y-m-d 00:00:00",strtotime($date_from));
@@ -240,7 +241,7 @@ class DataBillingRecap extends MY_Controller {
 				$qdate_till = $ret_dt['qdate_till'];
 				$qdate_till_max = $ret_dt['qdate_till_max'];
 				$params['where'][] = "(a.updated >= '".$qdate_from."' AND a.updated <= '".$qdate_till_max."')";
-						
+		
 			}
 		}
 				

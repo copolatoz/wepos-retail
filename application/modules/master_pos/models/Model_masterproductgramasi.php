@@ -183,7 +183,12 @@ class Model_MasterProductGramasi extends DB_Model {
 					//persentase
 					$product_hpp = $dt->product_hpp;
 					$product_price = $dt->product_price;
-					$persentase_hpp = round(($product_price/$dt->item_qty) /$product_hpp, 3);
+					
+					$persentase_hpp = 0;
+					if(!empty($product_hpp)){
+						$persentase_hpp = round(($product_price/$dt->item_qty) /$product_hpp, 3);
+					}
+					
 					$total_hpp = $dt->item_qty*$dt->item_price;
 					$sales_price = round($persentase_hpp*$total_hpp, 2);
 					

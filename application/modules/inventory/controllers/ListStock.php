@@ -680,7 +680,7 @@ class ListStock extends MY_Controller {
 		}*/
 		
 		//GET STOREHOUSE ITEM BY TRX STOCK
-		$this->db->select("a.item_id, a.storehouse_id, b.item_hpp");
+		$this->db->select("a.item_id, a.storehouse_id, a.trx_nominal");
 		$this->db->from($this->table_stock." as a");
 		$this->db->join($this->table_items.' as b',"b.id = a.item_id");
 		$this->db->where("a.storehouse_id = ".$current_storehouse_id);
@@ -700,7 +700,7 @@ class ListStock extends MY_Controller {
 						'total_stock_in'		=> 0,
 						'total_stock_out'		=> 0,
 						'total_stock'			=> 0,
-						'item_hpp'				=> $s['item_hpp']
+						'item_hpp'				=> $s['trx_nominal']
 					);
 				}
 			}
@@ -711,11 +711,28 @@ class ListStock extends MY_Controller {
 		$add_where = "(a.trx_date = '".$qdate_kemarin."')";
 		$this->db->select("a.*");
 		$this->db->from($this->table_stock_rekap." as a");
+		$this->db->join($this->table_items.' as b',"b.id = a.item_id");
 		$this->db->where($add_where);
 		$this->db->where("a.storehouse_id = ".$current_storehouse_id);
+		$this->db->where('b.is_deleted = 0');
+		$this->db->where('b.is_active = 1');
 		$get_rekap = $this->db->get();
 		if($get_rekap->num_rows() > 0){
 			foreach($get_rekap->result_array() as $dtR){
+				
+				if(empty($item_warehouse[$dtR['storehouse_id']][$dtR['item_id']])){
+					$item_warehouse[$dtR['storehouse_id']][$dtR['item_id']] = array(
+						'item_id'				=> $dtR['item_id'],
+						'storehouse_id'			=> $dtR['storehouse_id'],
+						'trx_date'				=> $qdate_from,
+						'total_stock_kemarin'	=> 0,
+						'total_stock_in'		=> 0,
+						'total_stock_out'		=> 0,
+						'total_stock'			=> 0,
+						'item_hpp'				=> $dtR['item_hpp']
+					);
+				}
+				
 				if(!empty($item_warehouse[$dtR['storehouse_id']][$dtR['item_id']])){
 					$item_warehouse[$dtR['storehouse_id']][$dtR['item_id']]['total_stock_kemarin'] = $dtR['total_stock'];
 					$item_warehouse[$dtR['storehouse_id']][$dtR['item_id']]['total_stock'] = $dtR['total_stock'];
@@ -729,14 +746,31 @@ class ListStock extends MY_Controller {
 		$this->db->select("a.*, b.storehouse_id");
 		$this->db->from($this->table_stock_opname_detail." as a");
 		$this->db->join($this->table_stock_opname." as b","b.id = a.sto_id","LEFT");
+		$this->db->join($this->table_items.' as b2',"b2.id = a.item_id");
 		//$this->db->where("b.storehouse_id > 0");
 		$this->db->where("b.storehouse_id = ".$current_storehouse_id);
 		$this->db->where("b.sto_status = 'done'");
+		$this->db->where('b2.is_deleted = 0');
+		$this->db->where('b2.is_active = 1');
 		$this->db->where($add_where);
 		$this->db->order_by("b.sto_date","DESC");
 		$get_sto = $this->db->get();
 		if($get_sto->num_rows() > 0){
 			foreach($get_sto->result_array() as $dtO){
+				
+				if(empty($item_warehouse[$dtO['storehouse_id']][$dtO['item_id']])){
+					$item_warehouse[$dtO['storehouse_id']][$dtO['item_id']] = array(
+						'item_id'				=> $dtO['item_id'],
+						'storehouse_id'			=> $dtO['storehouse_id'],
+						'trx_date'				=> $qdate_from,
+						'total_stock_kemarin'	=> 0,
+						'total_stock_in'		=> 0,
+						'total_stock_out'		=> 0,
+						'total_stock'			=> 0,
+						'item_hpp'				=> $dtO['current_hpp_avg']
+					);
+				}
+				
 				if(!empty($item_warehouse[$dtO['storehouse_id']][$dtO['item_id']])){
 					//echo $dtO['storehouse_id'].' -- '.$dtO['item_id'].' = '.$dtO['jumlah_fisik'].'<br/>';
 					$item_warehouse[$dtO['storehouse_id']][$dtO['item_id']]['total_stock_kemarin'] = $dtO['jumlah_fisik'];
@@ -838,7 +872,7 @@ class ListStock extends MY_Controller {
 		
 		
 		if($date_from == $date_till){
-			$r = array('success' => true, 'info'	=> 'Warehouse: '.$storehouse_name_display.', Stok on Date '.$date_from.' Been Generated!', 'curr_date' => $date_from);
+			$r = array('success' => true, 'info'	=> 'Warehouse: '.$storehouse_name_display.', Stok on Date '.$date_from.' Been Generated!', 'curr_date' => $date_from, 'item_warehouse' => $item_warehouse);
 			die(json_encode($r));
 		}
 		

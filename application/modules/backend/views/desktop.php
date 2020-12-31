@@ -4,26 +4,34 @@
 	<?php
 		$opt_var = array(
 			'produk_nama',
-			'hide_tanya_wepos'
+			'hide_tanya_wepos',
+			'merchant_key'
 		);
 		$get_opt = get_option_value($opt_var);
 		
 		if(empty($get_opt['produk_nama'])){
 			$get_opt['produk_nama'] = config_item('program_name');
 		}
+		if(empty($get_opt['merchant_key'])){
+			$get_opt['merchant_key'] = '';
+		}
 		
 	?>
-	<title><?php echo 'WePOS '.$get_opt['produk_nama']; ?> &mdash; <?php echo $this->session->userdata('client_name').' / '.$this->session->userdata('client_phone').' / '.$this->session->userdata('client_address'); ?></title> 
+	<title><?php echo $this->session->userdata('client_name').' / '.$get_opt['merchant_key'].' / Retail.'.$get_opt['produk_nama']; ?></title> 
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+	<meta name="viewport" content="width=device-width, initial-scale=0.68, minimum-scale=0.68, maximum-scale=1, viewport-fit=cover" />
 	<meta http-equiv="X-UA-Compatible" content="chrome=1">
 
-    <link rel="shortcut icon" href="<?php echo base_url(); ?>assets/themes/frontend/images/favicon.ico" />
+    <link rel="shortcut icon" href="<?php echo base_url(); ?>apps.min/helper/login/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="<?php echo base_url(); ?>apps.min/helper/login/icon-180x180.png">
 	<link rel="stylesheet" href="<?php echo base_url().'assets/desktop/css/loading.css'; ?>" />
 	<script src="<?php echo base_url().'backend/config?v='.time(); ?>" type="text/javascript" charset="utf-8"></script>
 	
 </head>
 <body>
-	<?php $update_v = strtotime("24-10-2019 00:33:00"); ?>
+	<?php $update_v = strtotime("01-01-2021 00:00:00"); ?>
 	<div id="loading-mask"></div>
 	<div id="loading">
 		<img src="<?php echo BASE_URL; ?>apps.min/helper/login/loader.gif" width="160" height="20" alt="Loading..." style="margin-bottom:25px;"/>
@@ -38,7 +46,7 @@
 		<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/js/extjs.4.2/theme/css/ext-all-neptune.css" />	
 		<link rel="stylesheet" href="<?php echo $apps_css; ?>" />
 	
-		<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/desktop/css/ext-modules.css" />	
+		<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>apps.min/helper/css/ext-modules.css" />	
 		
 		<script type="text/javascript">document.getElementById('msg').innerHTML = 'Memulai Aplikasi...';</script> 
 	

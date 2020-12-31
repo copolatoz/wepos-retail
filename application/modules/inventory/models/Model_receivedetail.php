@@ -404,13 +404,15 @@ class Model_receivedetail extends DB_Model {
 				$all_received_update = array();
 				$update_temp_id = array();
 				$all_update_temp_id = array();
-				$this->db->from($this->prefix.'receive_detail');
-				$this->db->where("receive_id", $receive_id);
+				$this->db->select("a.*, b.po_id");
+				$this->db->from($this->prefix.'receive_detail as a');
+				$this->db->join($this->prefix.'receiving as b',"b.id = a.receive_id","LEFT");
+				$this->db->where("a.receive_id", $receive_id);
 				$get_det = $this->db->get();
 				if($get_det->num_rows() > 0){
 					foreach($get_det->result() as $dt){
 						
-						$temp_id = 'new-'.$id_user.'-'.$dt->po_detail_id;
+						$temp_id = 'new-'.$id_user.'-'.$dt->po_id.'-'.$dt->po_detail_id;
 						if(!in_array($temp_id, $all_temp_update)){
 							$all_temp_update[] = $temp_id;
 							$all_received_update[] = $dt->id;

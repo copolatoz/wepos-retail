@@ -128,9 +128,9 @@ $total_cols = 9;
 						<td class="tbl_data_td" colspan="2"><?php echo $detail_text; ?></td>
 						<td class="tbl_data_td_xcenter"><?php echo $det['purchasing_detail_qty']; ?></td>
 						<td class="tbl_data_td_xcenter"><?php echo strtoupper($det['unit_code']); ?></td>
-						<td class="tbl_data_td_xright"><?php echo priceFormat($det['purchasing_detail_purchase']); ?></td>
-						<td class="tbl_data_td_xright"><?php echo priceFormat($det['purchasing_detail_total']); ?></td>
-						<td class="tbl_data_td_xright"><?php echo priceFormat($det['purchasing_detail_potongan']); ?></td>
+						<td class="tbl_data_td_xright">&nbsp;<?php echo priceFormat($det['purchasing_detail_purchase']); ?></td>
+						<td class="tbl_data_td_xright">&nbsp;<?php echo priceFormat($det['purchasing_detail_total']); ?></td>
+						<td class="tbl_data_td_xright">&nbsp;<?php echo priceFormat($det['purchasing_detail_potongan']); ?></td>
 					</tr>
 					<?php	
 					$total_qty += $det['purchasing_detail_qty'];

@@ -31,16 +31,23 @@ class WeposNotify extends MY_Controller {
 		}
 		
 		//NO DATA
-		$this->db->query("UPDATE ".$this->prefix_pos."product SET product_no = id WHERE product_no = 0");
-		$this->db->query("UPDATE ".$this->prefix_pos."items SET item_no = id WHERE item_no = 0");
-		$this->db->query("UPDATE ".$this->prefix_pos."supplier SET supplier_no = id WHERE supplier_no = 0");
-		$this->db->query("UPDATE ".$this->prefix_pos."customer SET customer_no = id WHERE customer_no = 0");
+		//$this->db->query("UPDATE ".$this->prefix_pos."product SET product_no = id WHERE product_no = 0");
+		//$this->db->query("UPDATE ".$this->prefix_pos."items SET item_no = id WHERE item_no = 0");
+		//$this->db->query("UPDATE ".$this->prefix_pos."supplier SET supplier_no = id WHERE supplier_no = 0");
+		//$this->db->query("UPDATE ".$this->prefix_pos."customer SET customer_no = id WHERE customer_no = 0");
+		
+		$today_mk = strtotime(date("d-m-Y"));
+		$day_min15_mk = $today_mk-(15*ONE_DAY_UNIX);
+		$day_min15 = date("Y-m-d", $day_min15_mk);
+		
+		//NON ACTIVE DISCOUNT
+		$this->db->query("UPDATE ".$this->prefix_pos."discount SET is_active = 0 WHERE date_end < '".$day_min15." 00:00:00' AND is_active = 1 AND is_deleted = 0 AND discount_date_type = 'limited_date'");
 		
 		//LIST NO
-		if(!$this->db->field_exists('list_no', $this->prefix_pos.'product_category'))
-		{
-			@$this->db->query("ALTER TABLE `".$this->prefix_pos.'product_category'."` ADD `list_no` int(11) DEFAULT 0;");
-		}
+		//if(!$this->db->field_exists('list_no', $this->prefix_pos.'product_category'))
+		//{
+		//	@$this->db->query("ALTER TABLE `".$this->prefix_pos.'product_category'."` ADD `list_no` int(11) DEFAULT 0;");
+		//}
 			
 		$r = array('success' => true, 'info' => 'Master Data Selesai');
 		die(json_encode($r));
@@ -157,11 +164,11 @@ class WeposNotify extends MY_Controller {
 			$get_so = $this->db->get();
 			if($get_so->num_rows() > 0){
 				foreach($get_so->result_array() as $dt){
-					$all_ref[] = $dt['salesorder_number'];
-					$all_salesorder[] = $dt['salesorder_number'];
+					$all_ref[] = $dt['so_number'];
+					$all_salesorder[] = $dt['so_number'];
 					$all_salesorder_id[] = $dt['id'];
-					$all_salesorder_no[$dt['id']] = $dt['salesorder_number'];
-					$all_salesorder_total[$dt['id']] = ($dt['salesorder_sub_total'] - $dt['salesorder_discount']);
+					$all_salesorder_no[$dt['id']] = $dt['so_number'];
+					$all_salesorder_total[$dt['id']] = ($dt['so_sub_total'] - $dt['so_discount']);
 					
 					
 				}
@@ -180,20 +187,20 @@ class WeposNotify extends MY_Controller {
 			if(!empty($all_salesorder_id)){
 				$all_salesorder_id_sql = implode(",", $all_salesorder_id);
 				$this->db->from($this->salesorder_detail);
-				$this->db->where("salesorder_id IN (".$all_salesorder_id_sql.")");
+				$this->db->where("so_id IN (".$all_salesorder_id_sql.")");
 				$get_resd = $this->db->get();
 				if($get_resd->num_rows() > 0){
 					foreach($get_resd->result_array() as $dt){
 						
-						if($dt['resd_qty'] > 0){
+						if($dt['sod_qty'] > 0){
 							$all_salesorder_detail[$dt['id']] = $dt['item_id'];
-							$all_salesorder_no_detail[$dt['id']] = $all_salesorder_no[$dt['salesorder_id']];
+							$all_salesorder_no_detail[$dt['id']] = $all_salesorder_no[$dt['so_id']];
 							
-							if(empty($all_salesorder_total_detail[$dt['salesorder_id']])){
-								$all_salesorder_total_detail[$dt['salesorder_id']] = 0;
+							if(empty($all_salesorder_total_detail[$dt['so_id']])){
+								$all_salesorder_total_detail[$dt['so_id']] = 0;
 							}
 							
-							$all_salesorder_total_detail[$dt['salesorder_id']] += ($dt['resd_total'] - $dt['resd_potongan']);
+							$all_salesorder_total_detail[$dt['so_id']] += ($dt['sod_total'] - $dt['sod_potongan']);
 							
 						}
 					}
@@ -591,25 +598,13 @@ class WeposNotify extends MY_Controller {
 			die(json_encode($r));
 		}
 		
-		$this->db->query("UPDATE ".$this->prefix_pos."billing SET total_credit = grand_total WHERE payment_id = 1 AND ((total_credit = 0 AND is_half_payment = 0) OR (total_credit = 0 AND total_cash = 0 AND is_half_payment = 1))");
-		
 		//clean yesterday billing
 		$opt_value = array(
-			'reset_billing_yesterday', 'current_date', 'produk_expired'
+			'reset_billing_yesterday', 'current_date', 'produk_expired',
+			'nontrx_sales_auto'
 		);
 		
 		$get_opt = get_option_value($opt_value);
-		if(!empty($get_opt['reset_billing_yesterday'])){
-			$mktime_yesterday = strtotime(date("d-m-Y")." 24:00:00") - ONE_DAY_UNIX;
-			$date_yesterday = date("Y-m-d H:i:s", $mktime_yesterday);
-			$this->db->query("DELETE FROM ".$this->prefix_pos."billing WHERE created <= '".$date_yesterday."'");
-			$this->db->query("DELETE FROM ".$this->prefix_pos."billing_detail WHERE created <= '".$date_yesterday."'");
-			$this->db->query("DELETE FROM ".$this->prefix_pos."billing_detail_split WHERE created <= '".$date_yesterday."'");
-			$this->db->query("DELETE FROM ".$this->prefix_pos."billing_additional_price WHERE created <= '".$date_yesterday."'");
-			$this->db->query("DELETE FROM ".$this->prefix_pos."billing_detail_timer WHERE created <= '".$date_yesterday."'");
-			$this->db->query("DELETE FROM ".$this->prefix_pos."billing_log WHERE created <= '".$date_yesterday."'");
-
-		}
 		
 		//autodelete_print_monitoring
 		$current_date = 0;
@@ -617,30 +612,81 @@ class WeposNotify extends MY_Controller {
 			$current_date = $get_opt['current_date'];
 		}
 		
+		$tgl_cek_mk = strtotime(date("d-m-Y"));
+		
 		$today_mktime = strtotime(date("d-m-Y H:i:s"));
 		$yesterday_mktime = $today_mktime - ONE_DAY_UNIX;
 		if($current_date < $today_mktime){
 			$update_opt = array('current_date' => $today_mktime);
 			update_option($update_opt);
+			
+			$current_date = $today_mktime;
+			$date_yesterday = date("Y-m-d", $yesterday_mktime)." 24:00:00";
+			
+			//print-monitoring
+			$this->db->query("DELETE FROM ".$this->prefix_pos."print_monitoring WHERE print_date <= '".$date_yesterday."'");
+			
+			//reset-billing
+			if(!empty($get_opt['reset_billing_yesterday'])){
+				$this->db->query("DELETE FROM ".$this->prefix_pos."billing WHERE created <= '".$date_yesterday."'");
+				$this->db->query("DELETE FROM ".$this->prefix_pos."billing_detail WHERE created <= '".$date_yesterday."'");
+				$this->db->query("DELETE FROM ".$this->prefix_pos."billing_detail_split WHERE created <= '".$date_yesterday."'");
+				$this->db->query("DELETE FROM ".$this->prefix_pos."billing_additional_price WHERE created <= '".$date_yesterday."'");
+				$this->db->query("DELETE FROM ".$this->prefix_pos."billing_detail_timer WHERE created <= '".$date_yesterday."'");
+				$this->db->query("DELETE FROM ".$this->prefix_pos."billing_log WHERE created <= '".$date_yesterday."'");
+			}
+			
+			//next-autobackup-sales
+			
+			$day_min15_mk = $today_mktime-(15*ONE_DAY_UNIX);
+			$day_min15 = date("Y-m-d", $day_min15_mk);
+			
+			//REMOVE NOTIF
+			$this->db->query("DELETE FROM ".$this->prefix_pos."notify_log WHERE log_date <= '".$day_min15."'");
+			
+		}else{
+			if($current_date <= $tgl_cek_mk){
+				$update_option = array('current_date' => $tgl_cek_mk);
+				update_option($update_option);
+				$current_date = $tgl_cek_mk;
+			}
 		}
 		
-		$this->db->query("DELETE FROM ".$this->prefix_pos."print_monitoring WHERE print_date <= '".$yesterday_mktime."'");
+		//autofixing-payment
+		$this->db->query("UPDATE ".$this->prefix_pos."billing SET total_credit = grand_total WHERE payment_id = 1 AND ((total_credit = 0 AND is_half_payment = 0) OR (total_credit = 0 AND total_cash = 0 AND is_half_payment = 1))");
 		
-		$day_min15_mk = $today_mktime-(15*ONE_DAY_UNIX);
-		$day_min15 = date("Y-m-d", $day_min15_mk);
-		
-		//REMOVE NOTIF
-		$this->db->query("DELETE FROM ".$this->prefix_pos."notify_log WHERE log_date <= '".$day_min15."'");
+		//update-2009.002
+		//nontrx-realisasi vs target
+		if(!empty($get_opt['nontrx_sales_auto'])){
+			
+			if(function_exists('realisasi_nontrx')){
+				$update_realisasi = realisasi_nontrx($tgl_cek_mk);
+			}
+			
+		}
 		
 		//check perpanjang berlangganan
 		if(!empty($get_opt['produk_expired'])){
 			if($get_opt['produk_expired'] != 'unlimited'){
-				$produk_expired = strtotime($get_opt['produk_expired']);
+				$produk_expired = strtotime($get_opt['produk_expired']." 23:59:59");
 				$produk_expired_alert = $produk_expired - (7*ONE_DAY_UNIX);
 				if($today_mktime >= $produk_expired_alert){
-					$sisa_hari = ceil(($produk_expired - $today_mktime)/ONE_DAY_UNIX);
-					$r = array('success' => false, 'info' => 'Masa berlaku aplikasi WePOS.id anda akan berakhir<br/>pada tanggal: <b>'.$get_opt['produk_expired'].', <font color="red">'.$sisa_hari.' Hari lagi</font></b><br/><br/>Silakan lakukan perpanjangan aplikasi</br>via website: <b>https://wepos.id</b><br/><br/>untuk pertanyaan seputar masa aktif hubungi<br/>CS: <b>0877-2229-4411</b> atau <b>0812-2254-9676</b></br>');
-					die(json_encode($r));
+					$sisa_hari = ($produk_expired - $today_mktime)/ONE_DAY_UNIX;
+					$sisa_jam = ($produk_expired - $today_mktime) % ONE_DAY_UNIX;
+					
+					if($sisa_hari > 3){
+						$sisa_hari = ceil($sisa_hari);
+						$sisa_hari_text = $sisa_hari.' Hari';
+					}else{
+						$sisa_hari = floor($sisa_hari);
+						$sisa_jam = ceil($sisa_jam/3600);
+						$sisa_hari_text = $sisa_hari.' Hari, '.$sisa_jam.' Jam';
+					}
+					
+					if($sisa_hari >= 0){
+						$r = array('success' => false, 'info' => 'Masa berlaku aplikasi WePOS.id anda akan berakhir<br/>pada tanggal: <b>'.$get_opt['produk_expired'].', <font color="red">'.$sisa_hari_text.' lagi</font></b><br/><br/>Silakan lakukan perpanjangan aplikasi</br>via website: <b>https://wepos.id</b><br/><br/>untuk pertanyaan seputar masa aktif hubungi<br/>CS: <b>0812-2254-9676</b></br>');
+						die(json_encode($r));
+					}
 				}
 			}
 		}

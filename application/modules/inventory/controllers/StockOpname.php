@@ -574,7 +574,9 @@ class StockOpname extends MY_Controller {
 		$r['totalDetail'] = 0;
 		
 		if($update_stock == true){
-							
+			
+			$all_item_stock = array();			
+			$get_curr_recap_item = array();			
 			$dtInsert_stock = array();
 				
 			$all_stod_id = array();
@@ -584,8 +586,47 @@ class StockOpname extends MY_Controller {
 			$this->db->where("sto_id", $sto_id);
 			$get_detail = $this->db->get();
 			if($get_detail->num_rows() > 0){
-				
 				foreach($get_detail->result_array() as $dt){
+					if(!in_array($dt['item_id'], $get_curr_recap_item)){
+						$get_curr_recap_item[] = $dt['item_id'];
+					}
+				}
+			}
+			
+			//stock_rekap
+			//update-2003.001
+			if(!empty($get_curr_recap_item)){
+				$get_curr_recap_item_sql = implode(",", $get_curr_recap_item);
+				$this->db->select("a.*");
+				$this->db->from($this->prefix."stock_rekap as a");
+				if(!empty($storehouse_id)){
+					$this->db->where('a.storehouse_id', $storehouse_id);	
+				}
+				$this->db->where("(a.trx_date = '".$sto_date."')");
+				$this->db->where("a.item_id IN (".$get_curr_recap_item_sql.")");
+				$getItemStock = $this->db->get();
+				if($getItemStock->num_rows() > 0){
+					foreach($getItemStock->result_array() as $dtR){
+						if(empty($all_item_stock[$dtR['item_id']])){
+							$all_item_stock[$dtR['item_id']] = $dtR;
+						}
+					}
+				}
+			}
+			
+			$update_jumlah_awal = array();
+			if($get_detail->num_rows() > 0){
+				foreach($get_detail->result_array() as $dt){
+					
+					if(!empty($all_item_stock[$dt['item_id']])){
+						if($dt['jumlah_awal'] != $all_item_stock[$dt['item_id']]['total_stock']){
+							$dt['jumlah_awal'] = $all_item_stock[$dt['item_id']]['total_stock'];
+							$update_jumlah_awal[] = array(
+								'id'	=> $dt['id'],
+								'jumlah_awal'	=> $dt['jumlah_awal']
+							);
+						}
+					}
 					
 					$is_selisih = $dt['jumlah_fisik'] - $dt['jumlah_awal'];
 					
@@ -641,6 +682,10 @@ class StockOpname extends MY_Controller {
 				'stod_status'	=> 1
 			);
 			$this->db->update($this->table2, $update_det, "sto_id = '".$sto_id."'");
+			
+			if(!empty($update_jumlah_awal)){
+				$this->db->update_batch($this->table2, $update_jumlah_awal, "id");
+			}
 						
 		}
 		

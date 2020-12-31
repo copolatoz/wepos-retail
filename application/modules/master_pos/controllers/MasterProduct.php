@@ -106,12 +106,67 @@ class MasterProduct extends MY_Controller {
 		//is_active_text
 		$sortAlias = array(
 			'is_active_text' => 'a.is_active',
-			'has_varian_text' => 'a.has_varian'
+			'product_price_show' => 'a.product_price',
+			'product_name_show' => 'a.product_name',
+			'has_varian_text' => 'a.has_varian',
+			'product_color' => 'a.product_bg_color'
 		);		
+
+		//update-2003.001
+		$get_opt = get_option_value(array('hide_compliment_order','display_kode_menu_dipencarian',
+		'cashier_menu_bg_text_color','cashier_display_menu_image',
+		'include_tax','include_service','diskon_sebelum_pajak_service',
+		'default_tax_percentage','default_service_percentage',
+		'mode_qty_unit','mode_touchscreen_cashier'));
+  		
+		//get option tax and service
+		$include_tax = 0;
+		if(!empty($get_opt['include_tax'])){
+			$include_tax = $get_opt['include_tax'];
+		}
 		
+		$include_service = 0;
+		if(!empty($get_opt['include_service'])){
+			$include_service = $get_opt['include_service'];
+		}
+		
+		$default_tax_percentage = 0;
+		if(!empty($get_opt['default_tax_percentage'])){
+			$default_tax_percentage = $get_opt['default_tax_percentage'];
+		}		
+		
+		$default_service_percentage = 0;
+		if(!empty($get_opt['default_service_percentage'])){
+			$default_service_percentage = $get_opt['default_service_percentage'];
+		}	
+		
+		$diskon_sebelum_pajak_service = 0;
+		if(!empty($get_opt['diskon_sebelum_pajak_service'])){
+			$diskon_sebelum_pajak_service = $get_opt['diskon_sebelum_pajak_service'];
+		}	
+		
+		$hide_compliment_order = 0;
+		if(!empty($get_opt['hide_compliment_order'])){
+			$hide_compliment_order = 1;
+		}
+		
+		//update-2011.001
+		$display_kode_menu_dipencarian = 0;
+		if(!empty($get_opt['display_kode_menu_dipencarian']) AND !empty($get_opt['mode_touchscreen_cashier'])){
+			$display_kode_menu_dipencarian = 1;
+		}
+		
+		//update-2001.002
+		$cashier_display_menu_image = 0;
+		if(!empty($get_opt['cashier_display_menu_image'])){
+			$cashier_display_menu_image = 1;
+		}
+		
+		$sql_fields_select = 'a.*, b.product_category_name, b.product_category_code, b.product_category_bg_color, b.product_category_text_color, c.id as item_id, c.item_code, d.unit_name, d.unit_code';
+	
 		// Default Parameter
 		$params = array(
-			'fields'		=> 'a.*, b.product_category_name,  b.product_category_code, c.id as item_id, c.item_code, c.use_stok_kode_unik, d.unit_name, d.unit_code',
+			'fields'		=> $sql_fields_select,
 			'primary_key'	=> 'a.id',
 			'table'			=> $this->table.' as a',
 			'join'			=> array(
@@ -135,9 +190,30 @@ class MasterProduct extends MY_Controller {
 		}
 		if(!empty($searching)){
 			$params['where'][] = "(a.product_name LIKE '%".$searching."%' OR b.product_category_name LIKE '%".$searching."%' OR a.product_code LIKE '%".$searching."%' OR c.item_code LIKE '%".$searching."%')";
+			
+			//update-2011.001
+			if($from_module == 'cashier' AND strlen($searching) >= 5){
+				$params['limit'] = 9999;
+			}
+			
 		}
 		if(!empty($category_id)){
-			$params['where'][] = "a.category_id = ".$category_id;
+			
+			if($category_id > 0){
+				
+				$params['where'][] = "a.category_id = ".$category_id;
+				
+				//update-2011.001
+				if($from_module == 'cashier'){
+					$params['limit'] = 9999;
+				}
+				
+			}else{
+				
+				$params['where'][] = "a.category_id > 0";
+				
+			}
+			
 		}
 		if(!empty($product_type)){
 			$params['where'][] = "a.product_type = '".$product_type."'";
@@ -161,13 +237,6 @@ class MasterProduct extends MY_Controller {
 		//get data -> data, totalCount
 		$get_data = $this->m->find_all($params);
 		
-		
-		//cek opt
-		$get_opt = get_option_value(array('hide_compliment_order'));
-  		$hide_compliment_order = 0;
-		if(!empty($get_opt['hide_compliment_order'])){
-			$hide_compliment_order = 1;
-		}
 		
 		//GET PROMO
 		$dt_promo = array();
@@ -363,6 +432,7 @@ class MasterProduct extends MY_Controller {
 		$get_package_id = array();
 		if(!empty($get_data['data'])){
 			foreach ($get_data['data'] as $s){
+				
 				if($s['product_type'] == 'package'){
 					if(!in_array($s['id'], $get_package_id)){
 						$get_package_id[] = $s['id'];
@@ -439,8 +509,13 @@ class MasterProduct extends MY_Controller {
 				}
 				if(empty($s['normal_price'])){
 					$s['normal_price'] = $s['product_price'];
-					$s['normal_price'] = $s['product_price'];
 				}
+				
+				//update-2011.001
+				if($from_module == 'cashier' AND !empty($get_opt['mode_qty_unit'])){
+					$s['product_price'] = $s['product_price']*$s['qty_unit'];
+				}
+				
 				$s['product_image_show'] = '<img src="'.$this->product_img_url.$s['product_image'].'" style="max-width:80px; max-height:60px;"/>';
 				$s['product_image_src'] = $this->product_img_url.$s['product_image'];
 				$s['is_active_text'] = ($s['is_active'] == '1') ? '<span style="color:green;">Active</span>':'<span style="color:red;">Inactive</span>';
@@ -451,6 +526,40 @@ class MasterProduct extends MY_Controller {
 				
 				$s['hide_compliment_order'] = $hide_compliment_order;
 				$s['product_name_show'] = $s['product_name'];
+				$s['product_name_code'] = $s['product_name'];
+				
+				//update-2001.002
+				if(empty($s['product_bg_color'])){
+					$s['product_bg_color'] = '000000';
+				}
+				
+				if($s['product_bg_color'] == '000000'){
+					if(!empty($s['product_category_bg_color']) AND $s['product_category_bg_color'] != '000000'){
+						$s['product_bg_color'] = $s['product_category_bg_color'];
+					}
+				}
+				
+				if(empty($s['product_text_color'])){
+					$s['product_text_color'] = 'FFFFFF';
+				}
+				
+				if($s['product_text_color'] == 'FFFFFF'){
+					if(!empty($s['product_category_text_color']) AND $s['product_category_text_color'] != 'FFFFFF'){
+						$s['product_text_color'] = $s['product_category_text_color'];
+					}
+				}
+				
+				$s['product_color'] = '<div style="border:1px solid #ccc; background-color:#'.$s['product_bg_color'].'; color:#'.$s['product_text_color'].'; padding:4px 4px; text-align:center;"><b>Text</b></div>';
+				
+				//update-2011-001
+				if(!empty($display_kode_menu_dipencarian)){
+					$s['product_name_code'] =  $s['product_code'].'<div>'.$s['product_name'].'</div>';
+					$s['product_name_show'] =  $s['product_code'].'<div>'.$s['product_name'].'</div>';
+					if(!empty($cashier_display_menu_image)){
+						$s['product_name_code'] =  $s['product_code'].'<div style="margin:2px 0px;">'.$s['product_name'].'</div>';
+						$s['product_name_show'] =  $s['product_code'].'<div style="margin:2px 0px;">'.$s['product_name'].'</div>';
+					}
+				}
 				
 				$s['product_id'] = $s['id'];
 				$s['product_price_hpp'] = $s['product_hpp'];
@@ -484,20 +593,110 @@ class MasterProduct extends MY_Controller {
 					$s['promo_percentage'] = $dt_promo[$usePromoID]->discount_percentage;
 					$s['promo_desc'] = $dt_promo[$usePromoID]->discount_name;
 					
-					if($dt_promo[$usePromoID]->discount_percentage == '0.00' AND !empty($dt_promo[$usePromoID]->discount_price)){
-						$s['promo_percentage'] = $dt_promo[$usePromoID]->discount_percentage;
-						$promo_price = $dt_promo[$usePromoID]->discount_price;
+					//update-2003.001
+					$tax_percentage = $default_tax_percentage;
+					$service_percentage = $default_service_percentage;
+					$product_price_real = 0;
+					if(!empty($include_tax) OR !empty($include_service)){
+						if(!empty($include_tax) AND !empty($include_service)){
+							$all_percentage = 100 + $tax_percentage + $service_percentage;
+							$one_percent = $s['product_price'] / $all_percentage;
+							$tax_total = priceFormat($one_percent * $tax_percentage, 0, ".", "");
+							$service_total = priceFormat($one_percent * $service_percentage, 0, ".", "");
+							$product_price_real = $s['product_price'] - ($tax_total + $service_total);
+						
+						}else{
+							if(!empty($include_tax)){
+								$all_percentage = 100 + $tax_percentage;
+								$one_percent = $s['product_price'] / $all_percentage;
+								$tax_total = priceFormat($one_percent * $tax_percentage, 0, ".", "");
+								$product_price_real = $s['product_price'] - ($tax_total);
+							}
+							
+							if(!empty($include_service)){
+								$all_percentage = 100 + $service_percentage;
+								$one_percent = $s['product_price'] / $all_percentage;
+								$service_total = priceFormat($one_percent * $service_percentage, 0, ".", "");
+								$product_price_real = $s['product_price'] - ($service_total);
+							}
+						}
+					}else
+					{
+						$product_price_real = $s['product_price'];
+					}
+				
+					//update-2003.001
+					//adjustment price
+					if($diskon_sebelum_pajak_service == 1){
+						
+						//promo
+						if($dt_promo[$usePromoID]->discount_percentage == '0.00' AND !empty($dt_promo[$usePromoID]->discount_price)){
+							$s['promo_percentage'] = $dt_promo[$usePromoID]->discount_percentage;
+							$promo_price = $dt_promo[$usePromoID]->discount_price;
+						}else{
+							$promo_price = priceFormat($product_price_real * ($s['promo_percentage']/100), 0, ".", "");
+						}
+						
+						$product_price = $product_price_real - $promo_price;
+						$tax_total = priceFormat($product_price * ($tax_percentage /100), 0, ".", "");
+						$service_total = priceFormat($product_price * ($service_percentage/100), 0, ".", "");
+						
+						if(!empty($include_tax) OR !empty($include_service)){
+							if(!empty($include_tax) AND !empty($include_service)){
+								$product_price = $product_price + $tax_total + $service_total;
+							}else{
+								if(!empty($include_tax)){
+									$product_price = $product_price + $tax_total;
+								}
+								if(!empty($include_service)){
+									$product_price = $product_price + $service_total;
+								}
+							}
+						}
+						
 					}else{
-						$promo_price = ($s['product_price'] * ($s['promo_percentage']/100));
+						$product_price = $product_price_real;
+						$tax_total = priceFormat($product_price * ($tax_percentage /100), 0, ".", "");
+						$service_total = priceFormat($product_price * ($service_percentage/100), 0, ".", "");
+						
+						//$product_price = $product_price+$tax_total+$service_total;
+						
+						//promo
+						if($dt_promo[$usePromoID]->discount_percentage == '0.00' AND !empty($dt_promo[$usePromoID]->discount_price)){
+							$s['promo_percentage'] = $dt_promo[$usePromoID]->discount_percentage;
+							$promo_price = $dt_promo[$usePromoID]->discount_price;
+						}else{
+							$product_price_tax_service = $product_price+$tax_total+$service_total;
+							$promo_price = priceFormat($product_price_tax_service * ($s['promo_percentage']/100),0,".","");
+						}
+						
+						if(!empty($include_tax) OR !empty($include_service)){
+							if(!empty($include_tax) AND !empty($include_service)){
+								$product_price = $product_price + $tax_total + $service_total;
+							}else{
+								if(!empty($include_tax)){
+									$product_price = $product_price + $tax_total;
+								}
+								if(!empty($include_service)){
+									$product_price = $product_price + $service_total;
+								}
+							}
+						}
+						
+						$product_price = $product_price - $promo_price;
 					}
 					
-					$product_price = $s['product_price'] - $promo_price;
+					
 					$s['product_price'] = $product_price;
 					$s['promo_price'] = $promo_price;
 					$s['promo_price_show'] = priceFormat($s['promo_price']);
 					$s['product_name_show'] = $s['product_name'].' <font color="orange">Promo</font>';
 					$s['product_price_show'] = '<strike>'.$s['product_price_show'].'</strike> <font color="orange">'.priceFormat($s['product_price']).'</font>';
 					
+					//update-1912-001
+					if(!empty($display_kode_menu_dipencarian)){
+						$s['product_name_show'] =  $s['product_code'].' '.$s['product_name'].' <font color="orange">Promo</font>';
+					}
 				}	
 				
 				//BUY & GET
@@ -526,6 +725,11 @@ class MasterProduct extends MY_Controller {
 					$s['buyget_qty'] = $data_buyget_product[$s['id']]->get_qty;
 					$s['buyget_percentage'] = numberFormat($data_buyget_product[$s['id']]->get_percentage,2);
 					$s['buyget_item'] = $data_buyget_product[$s['id']]->get_item;
+					
+					//update-1912-001
+					if(!empty($display_kode_menu_dipencarian)){
+						$s['product_name_show'] =  $s['product_code'].' '.$s['product_name'].' <font color="red">BG</font>';
+					}
 				}
 
 				$s['is_kerjasama_text'] = ($s['is_kerjasama'] == '1') ? '<span style="color:green;">Yes</span>':'<span style="color:red;">No</span>';
@@ -535,6 +739,7 @@ class MasterProduct extends MY_Controller {
 				if($from_module == 'cashier' AND in_array($s['id'], $ooo_menu)){
 					$allow_prod = false;
 				}
+				
 				
 				$s['data_stok_kode_unik'] = '';
 				if(in_array($s['id'], $allow_use_stok_kode_unik)){
@@ -653,12 +858,12 @@ class MasterProduct extends MY_Controller {
 			$include_service = $get_opt['include_service'];
 		}
 		
-		$default_tax_percentage = 10;
+		$default_tax_percentage = 0;
 		if(!empty($get_opt['default_tax_percentage'])){
 			$default_tax_percentage = $get_opt['default_tax_percentage'];
 		}		
 		
-		$default_service_percentage = 5;
+		$default_service_percentage = 0;
 		if(!empty($get_opt['default_service_percentage'])){
 			$default_service_percentage = $get_opt['default_service_percentage'];
 		}	
@@ -844,8 +1049,25 @@ class MasterProduct extends MY_Controller {
 		//$use_tax = $this->input->post('use_tax');
 		//$use_service = $this->input->post('use_service');
 		$tipe = $this->input->post('tipe');
+		
 		$from_item = $this->input->post('from_item');
 		$id_ref_item = $this->input->post('id_ref_item');
+		
+		//update-2011.002
+		$product_bg_color = $this->input->post('product_bg_color');
+		$product_text_color = $this->input->post('product_text_color');
+		if(empty($product_bg_color)){
+			$product_bg_color = '000000';
+		}
+		if(empty($product_text_color)){
+			$product_text_color = 'FFFFFF';
+		}
+		
+		//uupdate-2011.001
+		$qty_unit = $this->input->post('qty_unit');
+		if(empty($qty_unit)){
+			$qty_unit = 1;
+		}
 		
 		/*CONTENT IMAGE UPLOAD SIZE*/		
 		$this->product_img_url = RESOURCES_URL.'product/';		
@@ -969,7 +1191,7 @@ class MasterProduct extends MY_Controller {
 				if($product_type == 'package'){
 					$product_code = 'PKT-'.$product_code;
 				}else{
-					$product_code = 'SKU-'.$product_code;
+					$product_prefix = 'SKU-'.$product_code;
 				}
 				
 			}
@@ -1013,7 +1235,10 @@ class MasterProduct extends MY_Controller {
 					'createdby'		=>	$session_user,
 					'updated'		=>	date('Y-m-d H:i:s'),
 					'updatedby'		=>	$session_user,
-					'is_active'	=>	$is_active
+					'is_active'		=>	$is_active,
+					'product_bg_color'		=>	$product_bg_color,
+					'product_text_color'	=>	$product_text_color,
+					'qty_unit'		=>	$qty_unit,
 				),
 				'table'		=>  $this->table
 			);				
@@ -1096,16 +1321,25 @@ class MasterProduct extends MY_Controller {
 			}
 			
 			$var = array('fields'	=>	array(
-					'product_name'	=>	$product_name,
+					'product_name'  => 	$product_name,
+				    //'product_chinese_name'  => 	$product_chinese_name,
 					'product_desc'	=>	$product_desc,
 					'product_price'	=>	$product_price,
 					'normal_price'	=>	$normal_price,
+					//'product_hpp'	=>	$product_hpp,
+					//'product_type'	=>	$product_type,
+					//'product_group'	=>	$product_group,
 					'use_tax'		=>	$use_tax,
 					'use_service'	=>	$use_service,
 					'has_varian'	=>	$has_varian,
+					//'category_id'	=>	$category_id,
+					//'unit_id'		=>	$unit_id,
 					'updated'		=>	date('Y-m-d H:i:s'),
 					'updatedby'		=>	$session_user,
-					'is_active'		=>	$is_active
+					'is_active'		=>	$is_active,
+					'product_bg_color'		=>	$product_bg_color,
+					'product_text_color'	=>	$product_text_color,
+					'qty_unit'		=>	$qty_unit,
 				),
 				'table'			=>  $this->table,
 				'primary_key'	=>  'id'
@@ -1240,6 +1474,7 @@ class MasterProduct extends MY_Controller {
 			if($get_product->num_rows() > 0){
 							
 				$all_product_package = array();
+				$all_product_code = array();
 				
 				foreach($get_product->result() as $dtP){
 					if(!empty($dtP->product_image)){
@@ -1249,10 +1484,15 @@ class MasterProduct extends MY_Controller {
 					}
 					
 					if($dtP->product_type == 'package'){
-						if(!in_array($dtP->product_id, $all_product_package)){
-							$all_product_package[] = $dtP->product_id;
+						if(!in_array($dtP->id, $all_product_package)){
+							$all_product_package[] = $dtP->id;
 						}
 					}
+					
+					$all_product_code[] = array(
+						'id'			=> $dtP->id,
+						'product_code'	=> 'DEL-'.$dtP->id
+					);
 					
 				}
 				
@@ -1260,12 +1500,16 @@ class MasterProduct extends MY_Controller {
 					$all_product_package_txt = implode(",", $all_product_package);
 					$del_package = $this->db->update($this->table2, $data_update, "package_id IN (".$all_product_package_txt.") OR product_id IN (".$all_product_package_txt.")");
 				}
+				
+				if(!empty($all_product_code)){		
+					$this->db->update_batch($this->table, $all_product_code, "id");
+				}
 			}
             $r = array('success' => true); 
         }  
         else
         {  
-            $r = array('success' => false, 'info' => 'Delete Product Failed!'); 
+            $r = array('success' => false, 'info' => 'Hapus Product Gagal!'); 
         }
 		die(json_encode($r));
 	}
@@ -1278,7 +1522,7 @@ class MasterProduct extends MY_Controller {
 		$product_category_code = $this->input->post('product_category_code');
 		$tipe = $this->input->post('tipe');
 		
-		$r = array('success' => false, 'info' => 'Update Code Failed!'); 
+		$r = array('success' => false, 'info' => 'Update Kode Gagal!'); 
 		if(empty($id) OR empty($product_code) OR empty($tipe)){
 			die(json_encode($r));
 		}
@@ -1300,15 +1544,37 @@ class MasterProduct extends MY_Controller {
 	
 		}else{
 			
-			$product_code_format = '{Cat}-{ItemNo}';
+			//update-2011.001
+			$opt_value = array(
+				'product_code_format',
+				'product_code_separator',
+				'product_no_length',
+				'product_sku_from_code'
+			);
+			
+			$get_opt = get_option_value($opt_value);
+			
+			$product_code_format = '{Cat}{ProdNo}';
+			if(!empty($get_opt['product_code_format'])){
+				$product_code_format = $get_opt['product_code_format'];
+			}
+			
+			$product_code_separator = '';
+			if(!empty($get_opt['product_code_separator'])){
+				$product_code_separator = $get_opt['product_code_separator'];
+			}
+			
 			$product_no_length = 5;
+			if(!empty($get_opt['product_no_length'])){
+				$product_no_length = $get_opt['product_no_length'];
+			}
 			
 			$repl_attr = array(
 				"{Cat}"		=> $product_category_code
 			);
 			
 			$product_code_format = strtr($product_code_format, $repl_attr);
-			$get_exp = explode("{ItemNo}", $product_code_format);
+			$get_exp = explode($product_code_separator."{ProdNo}", $product_code_format);
 			$first_format = '';
 			$product_no = 0;
 			if(!empty($get_exp[0])){
@@ -1344,9 +1610,10 @@ class MasterProduct extends MY_Controller {
 		if($product_type == 'package'){
 			$product_prefix = 'PKT-';
 		}else{
-			$product_prefix = 'SKU-';
+			$product_prefix = 'SKU';
 		}
 		
+		//update-2011.001
 		$opt_value = array(
 			'product_code_format',
 			'product_code_separator',
@@ -1356,8 +1623,29 @@ class MasterProduct extends MY_Controller {
 		
 		$get_opt = get_option_value($opt_value);
 		
-		$product_code_format = '{Cat}-{ItemNo}';
+		$product_code_format = '{Cat}{ProdNo}';
+		if(!empty($get_opt['product_code_format'])){
+			$product_code_format = $get_opt['product_code_format'];
+		}
+		
+		$product_code_separator = '';
+		if(!empty($get_opt['product_code_separator'])){
+			$product_code_separator = $get_opt['product_code_separator'];
+		}
+		
 		$product_no_length = 5;
+		if(!empty($get_opt['product_no_length'])){
+			$product_no_length = $get_opt['product_no_length'];
+		}
+		
+		$product_sku_from_code = 0;
+		if(!empty($get_opt['product_sku_from_code'])){
+			$product_sku_from_code = $get_opt['product_sku_from_code'];
+		}
+		
+		if($product_sku_from_code == 1){
+			$product_sku = '';
+		}
 		
 		$repl_attr = array(
 			"{SKU}"		=> $product_sku,
@@ -1365,7 +1653,7 @@ class MasterProduct extends MY_Controller {
 		);
 		
 		$product_code_format = strtr($product_code_format, $repl_attr);
-		$get_exp = explode("{ItemNo}", $product_code_format);
+		$get_exp = explode($product_code_separator."{ProdNo}", $product_code_format);
 		$first_format = '';
 		if(!empty($get_exp[0])){
 			$first_format = $get_exp[0];
@@ -1390,7 +1678,7 @@ class MasterProduct extends MY_Controller {
 			}else{
 				
 				$this->db->from($this->table);
-				$this->db->where("product_code LIKE '".$product_prefix.$first_format."%'");
+				$this->db->where("product_code LIKE '".$first_format."%'");
 				$this->db->where("is_deleted = 0");
 				$this->db->order_by('product_no', 'DESC');
 				$this->db->order_by('product_code', 'DESC');
@@ -1420,7 +1708,7 @@ class MasterProduct extends MY_Controller {
 			}
 			
 			$repl_attr = array(
-				"{ItemNo}"		=> $product_code
+				"{ProdNo}"		=> $product_code_separator.$product_code
 			);
 			
 			$product_code_format = strtr($product_code_format, $repl_attr);
@@ -1455,17 +1743,21 @@ class MasterProduct extends MY_Controller {
 		}
 		
 		$repl_productno = array(
-			"{ItemNo}"		=> $product_code
+			"{ProdNo}"		=> $product_code_separator.$product_code
 		);
 		
 		$product_code = strtr($product_code_format, $repl_productno);	
 		
-		return array('product_no' => $product_no, 'product_code' => $product_code);				
+		if($product_sku_from_code == 1){
+			$product_sku = $product_code;
+			//$update_code['product_sku'] = $product_sku;
+		}
+		
+		return array('product_no' => $product_no, 'product_sku_from_code' => $product_sku_from_code, 'product_sku' => $product_sku, 'product_code' => $product_code);				
 	}
 	
-	public function importDataProduct()
-
-	{
+	public function importDataProduct(){
+		
 		$this->table = $this->prefix.'product';		
 		$session_user = $this->session->userdata('user_username');
 		
@@ -1576,30 +1868,6 @@ class MasterProduct extends MY_Controller {
 						
 						if(!empty($product_name)){
 							if(empty($id)){
-								//INSERT									
-								
-								/*$var = array(
-									'fields'	=>	array(
-										'product_name'	=> 	$product_name,
-										'product_desc'	=>	$product_desc,
-										'product_price'	=>	$product_price,
-										'normal_price'	=>	$normal_price,
-										'product_hpp'	=>	$product_hpp,
-										'product_type'	=>	$product_type,
-										'product_group' =>	$product_group,
-										'use_tax'		=>	$use_tax,
-										'use_service'	=>	$use_service,
-										'category_id'	=>	$category_id,
-										'created'		=>	$update_date,
-										'createdby'		=>	$session_user,
-										'updated'		=>	$update_date,
-										'updatedby'		=>	$session_user,
-									),
-									'table'		=>  $this->table
-								);	
-								
-								$q = $this->m->save($var);
-								*/
 								
 								$all_new_data[] = array(
 										'product_code'	=> 	$product_code,
@@ -1621,29 +1889,6 @@ class MasterProduct extends MY_Controller {
 									);
 								
 							}else{
-								//UPDATE
-								
-								/*$var = array(
-									'fields'	=>	array(
-										'product_name'	=> 	$product_name,
-										'product_desc'	=>	$product_desc,
-										'product_price'	=>	$product_price,
-										'normal_price'	=>	$normal_price,
-										'product_hpp'	=>	$product_hpp,
-										'product_type'	=>	$product_type,
-										'product_group' =>	$product_group,
-										'use_tax'		=>	$use_tax,
-										'use_service'	=>	$use_service,
-										'category_id'	=>	$category_id,
-										'updated'		=>	$update_date,
-										'updatedby'		=>	$session_user,
-									),
-									'table'			=>  $this->table,
-									'primary_key'	=>  'id'
-								);	
-								
-								$q = $this->m->save($var, $id);
-								*/
 								
 								if(!in_array($id, $available_id)){
 									//new
