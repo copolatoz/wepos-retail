@@ -399,9 +399,6 @@ ALTER TABLE `pos_closing_sales`
 ADD `discount_billing` DOUBLE DEFAULT '0',
 ADD `discount_item` DOUBLE DEFAULT '0';
 #
-INSERT INTO `apps_modules`(id,`module_name`,`module_author`,`module_version`,`module_description`,`module_folder`,`module_controller`,`module_is_menu`,`module_breadcrumb`,`module_order`,`module_icon`,`module_shortcut_icon`,`module_glyph_icon`,`module_glyph_font`,`module_free`,`running_background`,`show_on_start_menu`,`show_on_right_start_menu`,`start_menu_path`,`start_menu_order`,`start_menu_icon`,`start_menu_glyph`,`show_on_context_menu`,`context_menu_icon`,`context_menu_glyph`,`show_on_shorcut_desktop`,`desktop_shortcut_icon`,`desktop_shortcut_glyph`,`show_on_preference`,`preference_icon`,`preference_glyph`,`createdby`,`created`,`updatedby`,`updated`,`is_active`,`is_deleted`) VALUES 
-(194,'Set Auto Non-Trx/Compliment','dev@wepos.id','v.1.0.0','Set Auto Non-Trx/Compliment','billing','setupAutoBillingTax',0,'3. Cashier & Sales Order>Non-Trx/Compliment>Set Auto Non-Trx/Compliment',1,'icon-grid','icon-grid','','',1,0,1,0,'3. Cashier & Sales Order>Non-Trx/Compliment>Set Auto Non-Trx/Compliment',6120,'icon-grid','',0,'icon-grid','',1,'icon-grid','',1,'icon-grid','','administrator','2020-07-31 05:51:55','administrator','2020-07-31 17:47:33',1,0);
-#
 INSERT INTO `apps_roles_module` (`role_id`, `module_id`, `start_menu_path`, `module_order`, `createdby`, `created`, `updatedby`, `updated`, `is_active`, `is_deleted`) VALUES
 (1, 194, NULL, 0, 'admin', '2020-07-31 10:14:10', 'admin', '2020-07-31 10:14:10', 1, 0),
 (2, 194, NULL, 0, 'admin', '2020-07-31 10:14:10', 'admin', '2020-07-31 10:14:10', 1, 0),
