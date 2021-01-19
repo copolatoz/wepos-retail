@@ -389,6 +389,9 @@ ADD `block_table` TINYINT(1) DEFAULT '0';
 ALTER TABLE `pos_billing_detail`
 ADD `diskon_sebelum_pajak_service` TINYINT(1) DEFAULT '0';
 #
+ALTER TABLE `pos_billing_detail_split`
+ADD `diskon_sebelum_pajak_service` TINYINT(1) DEFAULT '0';
+#
 ALTER TABLE `pos_billing_detail`
 MODIFY `order_qty` FLOAT DEFAULT '0',
 MODIFY `buyget_qty` FLOAT DEFAULT '0',

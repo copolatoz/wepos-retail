@@ -2136,7 +2136,8 @@ CREATE TABLE IF NOT EXISTS `pos_billing_detail_split` (
   `use_stok_kode_unik` tinyint(1) DEFAULT '0',
   `data_stok_kode_unik` text,
   `product_type` enum('item','package') DEFAULT 'item',
-  `package_item` tinyint(1) DEFAULT '0'
+  `package_item` tinyint(1) DEFAULT '0',
+  `diskon_sebelum_pajak_service` tinyint(1) DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

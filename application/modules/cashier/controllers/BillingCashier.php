@@ -252,6 +252,9 @@ class BillingCashier extends MY_Controller {
 			$getBilling->total_billing_rp = 'Rp '.priceFormat($getBilling->total_billing);
 		}
 		
+		//update-2001.002
+		$getBilling->created_datetime = date('d-m-Y H:i', strtotime($getBilling->created));
+		
 		$r = array('success' => true, 'billingData'	=> $getBilling);
 		echo json_encode($r);
 		die();
@@ -729,6 +732,12 @@ class BillingCashier extends MY_Controller {
 			$autocut_stok_sales_to_usage = $get_opt['autocut_stok_sales_to_usage'];
 		}
 		
+		//update-1912-002		
+		$autocut_stok_sales = 0;
+		if(!empty($get_opt['autocut_stok_sales'])){
+			$autocut_stok_sales = $get_opt['autocut_stok_sales'];
+		}
+		
 		$diskon_sebelum_pajak_service = 0;
 		if(!empty($get_opt['diskon_sebelum_pajak_service'])){
 			$diskon_sebelum_pajak_service = $get_opt['diskon_sebelum_pajak_service'];
@@ -787,6 +796,11 @@ class BillingCashier extends MY_Controller {
 			{  
 				if($billingData->billing_status == 'paid'){
 					if(!empty($retail_warehouse)){
+						
+						$get_billno_y = substr($billingData->billing_no,0,2);
+						$get_billno_m = substr($billingData->billing_no,2,2);
+						$get_billno_d = substr($billingData->billing_no,4,2);
+						$billing_date = (2000+$get_billno_y)."-".$get_billno_m."-".$get_billno_d;
 						
 						if($autocut_stok_sales_to_usage == 1){
 						
@@ -1151,7 +1165,7 @@ class BillingCashier extends MY_Controller {
 				$this->db->select("b.id, b.billing_no");
 				$this->db->from($this->table_billing." as b");
 				$this->db->where("b.billing_status = 'hold'");
-				$this->db->where("b.created >= '".date("Y-m-d 00:00:00")."'");
+				$this->db->where("b.created >= '".date("Y-m-d 00:00:07")."'");
 				
 				$get_hold_billing = $this->db->get();
 				if($get_hold_billing->num_rows() > 0){

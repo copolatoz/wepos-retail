@@ -1107,7 +1107,9 @@ if(!function_exists('updateTable')){
 		
 		$scope->prefix_apps = config_item('db_prefix');
 		$scope->prefix = config_item('db_prefix2');
-		$scope->table = $scope->prefix.'billing';				
+		$scope->table = $scope->prefix.'billing';			
+		$scope->table_billing = $scope->prefix.'billing';
+		$scope->table_detail = $scope->prefix.'billing_detail';		
 		$scope->table_inv = $scope->prefix.'table_inventory';
 		
 		$billing_id = $scope->input->post('billing_id', true);
@@ -1377,7 +1379,7 @@ if(!function_exists('updateTable')){
 				}
 				
 				//UPDATE OPTIONS
-				$scope->db->update($scope->table, $data_update_billing, "id = '".$billing_id."'");
+				$scope->db->update($scope->table_billing, $data_update_billing, "id = '".$billing_id."'");
 				
 				if(empty($is_salesorder)){
 					//INV
@@ -1462,7 +1464,7 @@ if(!function_exists('updateTable')){
 					);
 							
 					//UPDATE OPTIONS
-					$scope->db->update($scope->table, $data_table, "id = '".$billing_id."'");
+					$scope->db->update($scope->table_billing, $data_table, "id = '".$billing_id."'");
 					
 				}
 				
@@ -1501,15 +1503,24 @@ if(!function_exists('updateTable')){
 							'takeaway_no_service' => $takeaway_no_service,
 						);
 					}else{
-						$data_takeaway = array(
-							'is_takeaway' => 0,
-							'takeaway_no_tax' => 0,
-							'takeaway_no_service' => 0,
-						);
+						
+						if(!empty($billingData->table_tipe)){
+							//old
+							if($billingData->table_tipe == 'takeaway'){
+								$data_takeaway = array(
+									'is_takeaway' => 0,
+									'takeaway_no_tax' => 0,
+									'takeaway_no_service' => 0,
+								);
+							}
+							
+						}
+						
 					}
 					
-					$scope->db->update($scope->table_detail, $data_takeaway, "billing_id = '".$billing_id."' AND is_deleted = 0");
-					
+					if(!empty($data_takeaway)){
+						$scope->db->update($scope->table_detail, $data_takeaway, "billing_id = '".$billing_id."' AND is_deleted = 0");
+					}
 				}
 				
 				$r['is_all_takeaway'] = $is_all_takeaway; 
